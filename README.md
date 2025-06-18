@@ -11,8 +11,7 @@ keep your fur dry!
 
 I made this game to have some fun, and to learn Rust! It is my first ever rust project, so don't expect it to be
 perfect.  
-It's using the TUI framework [ratatui](https://ratatui.rs/), which plays on the name of one of my favourite movies,
-Ratatouille.
+It's made using Bevy, a game engine for Rust, and is heavily inspired by the original chrome dinosaur game.
 
 ## How do I play?
 
