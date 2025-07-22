@@ -10,9 +10,9 @@ pub mod animation {
     use bevy::sprite::Sprite;
     use bevy::time::{Timer, TimerMode};
     pub(crate) fn animate(
-        mut commands: Commands,
-        asset_server: Res<AssetServer>,
-        mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+        mut commands: &Commands,
+        asset_server: &Res<AssetServer>,
+        mut texture_atlas_layouts: &ResMut<Assets<TextureAtlasLayout>>,
         filepath: &str,
         frames: usize,
         cat_walk_speed: f32,
