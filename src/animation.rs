@@ -16,7 +16,7 @@ pub mod animation {
         filepath: &str,
         frames: usize,
         fps: f32,          // frames per second
-        translation: Vec3, // position (x, y)
+        translation: Vec3, // position (x, y, z)
     ) {
         let texture = asset_server.load(filepath);
         let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), frames as u32, 1, None, None);
