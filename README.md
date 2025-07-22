@@ -16,4 +16,4 @@ It's made using Bevy, a game engine for Rust, and is heavily inspired by the ori
 ## How do I play?
 
 I haven't even made it yet so uhh, come back later and it should be made soon™.  
-Exact date: Before July 2025.
+Exact date: Before Sep 2025. 100% guaranteed
