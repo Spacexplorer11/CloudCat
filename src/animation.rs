@@ -15,7 +15,8 @@ pub mod animation {
         texture_atlas_layouts: &mut ResMut<Assets<TextureAtlasLayout>>,
         filepath: &str,
         frames: usize,
-        fps: f32, // frames per second
+        fps: f32,          // frames per second
+        translation: Vec3, // position (x, y)
     ) {
         let texture = asset_server.load(filepath);
         let layout = TextureAtlasLayout::from_grid(UVec2::splat(32), frames as u32, 1, None, None);
@@ -32,7 +33,11 @@ pub mod animation {
                     index: animation_indices.first,
                 },
             ),
-            Transform::from_scale(Vec3::splat(6.0)),
+            Transform {
+                scale: Vec3::splat(6.0),
+                translation,
+                ..Default::default()
+            },
             animation_indices,
             AnimationTimer(Timer::from_seconds(fps, TimerMode::Repeating)),
         ));
