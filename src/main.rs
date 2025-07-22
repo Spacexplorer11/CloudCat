@@ -1,7 +1,20 @@
 mod animation;
 
 use crate::animation::animate_sprite;
-use bevy::prelude::*;
+use bevy::app::PluginGroup;
+use bevy::image::TextureAtlasLayout;
+use bevy::math::Vec3;
+use bevy::prelude::{Camera2d, Deref, DerefMut, ImagePlugin};
+use bevy::{
+    DefaultPlugins,
+    app::{App, Startup, Update},
+    asset::{AssetServer, Assets},
+    ecs::{
+        component::Component,
+        system::{Commands, Res, ResMut},
+    },
+    time::Timer,
+};
 
 fn main() {
     App::new()
@@ -23,16 +36,26 @@ struct AnimationTimer(Timer);
 fn game_loop(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
+    mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let cat_walk_speed: f32 = 0.1;
+    let cat_walk_speed: f32 = 0.4; // will decrease to go faster as game progresses
     commands.spawn(Camera2d);
     animation::animation::animate(
-        commands,
-        asset_server,
-        texture_atlas_layouts,
+        &mut commands,
+        &asset_server,
+        &mut texture_atlas_layouts,
         "cat.png",
         3,
         cat_walk_speed,
+        Vec3::new(-100.0, 0.0, 0.0),
     );
+    animation::animation::animate(
+        &mut commands,
+        &asset_server,
+        &mut texture_atlas_layouts,
+        "cloud.png",
+        7,
+        0.1,
+        Vec3::new(150.0, 100.0, 0.0),
+    )
 }
