@@ -2,14 +2,18 @@ use macroquad::prelude::*;
 
 #[macroquad::main("CloudCat")]
 async fn main() {
-    let mut frame = 0;
-    let mut timer = 0.0;
+    let mut cat_frame = 0;
+    let mut cat_timer = 0.0;
+    let mut cloud_frame = 0;
+    let mut cloud_timer = 0.0;
     loop {
         clear_background(WHITE);
 
         draw_text("CloudCat", screen_width() * 0.45, 50.0, 50.0, DARKGRAY);
 
-        (timer, frame) = draw_cat(timer, frame).await;
+        (cloud_timer, cloud_frame) = draw_cloud(cloud_timer, cloud_frame).await;
+
+        (cat_timer, cat_frame) = draw_cat(cat_timer, cat_frame).await;
 
         next_frame().await
     }
@@ -26,10 +30,10 @@ async fn draw_cat(mut timer: f32, mut frame: i32) -> (f32, i32) {
     draw_texture_ex(
         &cat,
         100.0,
-        100.0,
+        screen_height() - 200.0,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(vec2(frame_width * 10.0, frame_height * 10.0)),
+            dest_size: Some(vec2(frame_width * 5.0, frame_height * 5.0)),
             source: Some(Rect {
                 x: frame_width * frame as f32,
                 y: 0.0,
@@ -44,6 +48,39 @@ async fn draw_cat(mut timer: f32, mut frame: i32) -> (f32, i32) {
     if timer > cat_run_speed {
         timer = 0.0;
         frame = (frame + 1) % 3;
+    }
+    (timer, frame)
+}
+
+async fn draw_cloud(mut timer: f32, mut frame: i32) -> (f32, i32) {
+    let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
+    cloud.set_filter(FilterMode::Nearest);
+
+    let fps = 0.1;
+
+    let frame_width = 32.0;
+    let frame_height = 32.0;
+    draw_texture_ex(
+        &cloud,
+        350.0,
+        screen_height() - 390.0,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(vec2(frame_width * 6.0, frame_height * 7.0)),
+            source: Some(Rect {
+                x: frame_width * frame as f32,
+                y: 0.0,
+                w: frame_width,
+                h: frame_height,
+            }),
+            ..Default::default()
+        },
+    );
+
+    timer += get_frame_time();
+    if timer > fps {
+        timer = 0.0;
+        frame = (frame + 1) % 7;
     }
     (timer, frame)
 }
