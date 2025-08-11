@@ -5,7 +5,7 @@ async fn main() {
     // Catty variables :3
     let mut cat_frame = 0;
     let mut cat_timer = 0.0;
-    let cat_run_speed = 0.1;
+    let cat_run_speed = 0.05;
 
     // Cloud variables ☁
     let mut cloud_frame = 0;
@@ -20,7 +20,10 @@ async fn main() {
 
         (cat_timer, cat_frame) = draw_cat(cat_timer, cat_frame, cat_run_speed).await;
 
-        cloud_x -= 1.0;
+        cloud_x -= cat_run_speed * 50.0;
+        if cloud_x < -192.0 {
+            cloud_x = screen_width();
+        }
 
         next_frame().await
     }
