@@ -20,10 +20,19 @@ async fn main() {
 
     // Umbrella variable! Squid games....
     let mut umbrella_start_time = 0.0;
+
+    // Score RAWH
+    let mut score = 0;
     loop {
         clear_background(WHITE);
 
-        draw_text("CloudCat", screen_width() * 0.4, 50.0, 50.0, DARKGRAY);
+        draw_text(
+            &format!("Score: {}", score),
+            screen_width() * 0.7,
+            50.0,
+            50.0,
+            DARKGRAY,
+        );
 
         if is_key_pressed(KeyCode::Space) {
             if get_time() - umbrella_start_time > 3.0 {
@@ -53,6 +62,7 @@ async fn main() {
             floor_x = 0.0;
         }
 
+        score += 1;
         next_frame().await
     }
 }
