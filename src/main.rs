@@ -12,14 +12,29 @@ async fn main() {
     let mut cloud_timer = 0.0;
     let mut cloud_x = 350.0;
 
-    // Floor variable :( only 1 unlike the others lol
+    // Floor variable, just one :(
     let mut floor_x = 0.0;
+
+    // Umbrella variable! Squid games....
+    let mut umbrella_start_time = 0.0;
     loop {
         clear_background(WHITE);
 
-        draw_text("CloudCat", screen_width() * 0.45, 50.0, 50.0, DARKGRAY);
+        draw_text("CloudCat", screen_width() * 0.4, 50.0, 50.0, DARKGRAY);
+
+        if is_key_pressed(KeyCode::Space) {
+            if get_time() - umbrella_start_time > 3.0 {
+                umbrella_start_time = get_time();
+            } else if umbrella_start_time == 0.0 {
+                umbrella_start_time = get_time();
+            }
+        }
 
         (cloud_timer, cloud_frame) = draw_cloud(cloud_timer, cloud_frame, cloud_x).await;
+
+        if get_time() - umbrella_start_time < 3.0 && umbrella_start_time != 0.0 {
+            draw_umbrella().await;
+        }
 
         (cat_timer, cat_frame) = draw_cat(cat_timer, cat_frame, cat_run_speed).await;
 
@@ -107,11 +122,9 @@ async fn draw_floor(floor_x: f32) {
     let floor: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor.set_filter(FilterMode::Nearest);
 
-    // Make the floor span the whole screen width for responsiveness
     let floor_width = screen_width();
     let floor_height = 24.0;
 
-    // Draw two segments to create a seamless scrolling loop
     for offset in [0.0, floor_width].iter() {
         draw_texture_ex(
             &floor,
@@ -120,10 +133,34 @@ async fn draw_floor(floor_x: f32) {
             WHITE,
             DrawTextureParams {
                 dest_size: Some(vec2(floor_width, floor_height)),
-                // Use the full texture; letting Macroquad stretch it to dest size
                 source: None,
                 ..Default::default()
             },
         );
     }
+}
+
+async fn draw_umbrella() {
+    let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
+    umbrella.set_filter(FilterMode::Nearest);
+
+    let umbrella_width = 32.0;
+    let umbrella_height = 32.0;
+
+    draw_texture_ex(
+        &umbrella,
+        100.0,
+        screen_height() - 270.0,
+        WHITE,
+        DrawTextureParams {
+            dest_size: Some(vec2(umbrella_width * 7.0, umbrella_height * 8.0)),
+            source: Some(Rect {
+                x: 0.0,
+                y: 0.0,
+                w: umbrella_width,
+                h: umbrella_height,
+            }),
+            ..Default::default()
+        },
+    );
 }
