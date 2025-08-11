@@ -1,7 +1,10 @@
+use ::rand::{Rng, thread_rng};
 use macroquad::prelude::*;
 
 #[macroquad::main("CloudCat")]
 async fn main() {
+    let mut rng = thread_rng();
+
     // Catty variables :3
     let mut cat_frame = 0;
     let mut cat_timer = 0.0;
@@ -42,7 +45,7 @@ async fn main() {
 
         cloud_x -= cat_run_speed * 50.0;
         if cloud_x < -192.0 {
-            cloud_x = screen_width();
+            cloud_x = screen_width() + rng.gen_range(150.0..=200.0);
         }
 
         floor_x -= cat_run_speed * 50.0;
