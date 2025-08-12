@@ -18,7 +18,7 @@ async fn main() {
     // Catty variables :3
     let mut cat_frame = 0;
     let mut cat_timer = 0.0;
-    let cat_run_speed = 0.05;
+    let mut cat_run_speed = 0.05;
 
     // Cloud variables ☁
     let mut cloud_frame = 0;
@@ -73,7 +73,11 @@ async fn main() {
             }
         }
 
-        cloud_x -= cat_run_speed * 50.0;
+        if cat_run_speed > 0.01 {
+            cat_run_speed -= 0.00001;
+        }
+
+        cloud_x -= 0.125 / cat_run_speed;
         if cloud_x < -192.0 {
             cloud_x = screen_width() + rng.gen_range(150.0..=200.0);
         }
@@ -89,7 +93,7 @@ async fn main() {
 
         draw_floor(&floor_tex, floor_x).await;
 
-        floor_x -= cat_run_speed * 50.0;
+        floor_x -= 0.125 / cat_run_speed;
         if floor_x <= -screen_width() {
             floor_x = 0.0;
         }
