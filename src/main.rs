@@ -21,9 +21,32 @@ async fn main() {
     // Umbrella variable! Squid games....
     let mut umbrella_start_time = 0.0;
 
+    // Game OVER RAWHHH >:)
+    let mut game_over = false;
+
     // Score RAWH
     let mut score = 0;
     loop {
+        if game_over {
+            clear_background(RED);
+            draw_text(
+                "GAME OVER",
+                screen_width() * 0.25,
+                screen_height() * 0.5,
+                100.0,
+                DARKGRAY,
+            );
+            draw_text(
+                "Please restart the game to play again",
+                screen_width() * 0.2,
+                screen_height() * 0.7,
+                30.0,
+                DARKGRAY,
+            );
+            next_frame().await;
+            continue;
+        }
+
         clear_background(WHITE);
 
         draw_text(
@@ -35,16 +58,15 @@ async fn main() {
         );
 
         if is_key_pressed(KeyCode::Space) {
-            if get_time() - umbrella_start_time > 3.0 {
-                umbrella_start_time = get_time();
-            } else if umbrella_start_time == 0.0 {
+            if umbrella_start_time == 0.0 || get_time() - umbrella_start_time > 3.0 {
                 umbrella_start_time = get_time();
             }
         }
 
         (cloud_timer, cloud_frame) = draw_cloud(cloud_timer, cloud_frame, cloud_x).await;
 
-        if get_time() - umbrella_start_time < 3.0 && umbrella_start_time != 0.0 {
+        let umbrella_up = umbrella_start_time != 0.0 && (get_time() - umbrella_start_time) < 3.0;
+        if umbrella_up {
             draw_umbrella().await;
         }
 
@@ -62,8 +84,13 @@ async fn main() {
             floor_x = 0.0;
         }
 
+        if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
+            game_over = true;
+        }
+
         score += 1;
-        next_frame().await
+
+        next_frame().await;
     }
 }
 
