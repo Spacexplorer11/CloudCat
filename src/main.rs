@@ -5,6 +5,16 @@ use macroquad::prelude::*;
 async fn main() {
     let mut rng = thread_rng();
 
+    // Load textures once to avoid per-frame loading slowdowns
+    let cat: Texture2D = load_texture("assets/cat.png").await.unwrap();
+    cat.set_filter(FilterMode::Nearest);
+    let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
+    cloud.set_filter(FilterMode::Nearest);
+    let floor_tex: Texture2D = load_texture("assets/floor.png").await.unwrap();
+    floor_tex.set_filter(FilterMode::Nearest);
+    let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
+    umbrella.set_filter(FilterMode::Nearest);
+
     // Catty variables :3
     let mut cat_frame = 0;
     let mut cat_timer = 0.0;
@@ -63,21 +73,21 @@ async fn main() {
             }
         }
 
-        (cloud_timer, cloud_frame) = draw_cloud(cloud_timer, cloud_frame, cloud_x).await;
-
-        let umbrella_up = umbrella_start_time != 0.0 && (get_time() - umbrella_start_time) < 3.0;
-        if umbrella_up {
-            draw_umbrella().await;
-        }
-
-        (cat_timer, cat_frame) = draw_cat(cat_timer, cat_frame, cat_run_speed).await;
-
-        draw_floor(floor_x).await;
-
         cloud_x -= cat_run_speed * 50.0;
         if cloud_x < -192.0 {
             cloud_x = screen_width() + rng.gen_range(150.0..=200.0);
         }
+
+        (cloud_timer, cloud_frame) = draw_cloud(&cloud, cloud_timer, cloud_frame, cloud_x).await;
+
+        let umbrella_up = umbrella_start_time != 0.0 && (get_time() - umbrella_start_time) < 3.0;
+        if umbrella_up {
+            draw_umbrella(&umbrella).await;
+        }
+
+        (cat_timer, cat_frame) = draw_cat(&cat, cat_timer, cat_frame, cat_run_speed).await;
+
+        draw_floor(&floor_tex, floor_x).await;
 
         floor_x -= cat_run_speed * 50.0;
         if floor_x <= -screen_width() {
@@ -94,10 +104,12 @@ async fn main() {
     }
 }
 
-async fn draw_cat(mut timer: f32, mut frame: i32, cat_run_speed: f32) -> (f32, i32) {
-    let cat: Texture2D = load_texture("assets/cat.png").await.unwrap();
-    cat.set_filter(FilterMode::Nearest);
-
+async fn draw_cat(
+    cat: &Texture2D,
+    mut timer: f32,
+    mut frame: i32,
+    cat_run_speed: f32,
+) -> (f32, i32) {
     let frame_width = 32.0;
     let frame_height = 32.0;
     draw_texture_ex(
@@ -125,10 +137,7 @@ async fn draw_cat(mut timer: f32, mut frame: i32, cat_run_speed: f32) -> (f32, i
     (timer, frame)
 }
 
-async fn draw_cloud(mut timer: f32, mut frame: i32, cloud_x: f32) -> (f32, i32) {
-    let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
-    cloud.set_filter(FilterMode::Nearest);
-
+async fn draw_cloud(cloud: &Texture2D, mut timer: f32, mut frame: i32, cloud_x: f32) -> (f32, i32) {
     let fps = 0.1;
 
     let frame_width = 32.0;
@@ -158,10 +167,7 @@ async fn draw_cloud(mut timer: f32, mut frame: i32, cloud_x: f32) -> (f32, i32) 
     (timer, frame)
 }
 
-async fn draw_floor(floor_x: f32) {
-    let floor: Texture2D = load_texture("assets/floor.png").await.unwrap();
-    floor.set_filter(FilterMode::Nearest);
-
+async fn draw_floor(floor: &Texture2D, floor_x: f32) {
     let floor_width = screen_width();
     let floor_height = 24.0;
 
@@ -180,10 +186,7 @@ async fn draw_floor(floor_x: f32) {
     }
 }
 
-async fn draw_umbrella() {
-    let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
-    umbrella.set_filter(FilterMode::Nearest);
-
+async fn draw_umbrella(umbrella: &Texture2D) {
     let umbrella_width = 32.0;
     let umbrella_height = 32.0;
 
