@@ -1,0 +1,253 @@
+name: Release Let's Do It
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.85.0
+          override: true
+
+      - name: Check Cargo version bump (macOS)
+        id: version
+        run: |
+          set -e
+          CARGO_VERSION=$(grep -m1 '^version\s*=\s*"' Cargo.toml | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+          SHOULD_RELEASE=false
+          if [ -z "$LATEST_TAG" ]; then
+            SHOULD_RELEASE=true
+          else
+            LATEST_VER=${LATEST_TAG#v}
+            if [ "v$CARGO_VERSION" = "$LATEST_TAG" ]; then
+              SHOULD_RELEASE=false
+            else
+              top=$(printf '%s\n' "$LATEST_VER" "$CARGO_VERSION" | sort -V | tail -n1)
+              if [ "$top" = "$CARGO_VERSION" ]; then
+                SHOULD_RELEASE=true
+              fi
+            fi
+          fi
+          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
+          echo "LATEST_TAG=${LATEST_TAG:-}" >> $GITHUB_ENV
+          echo "NEW_TAG=v$CARGO_VERSION" >> $GITHUB_ENV
+          echo "SHOULD_RELEASE=$SHOULD_RELEASE" >> $GITHUB_ENV
+
+      - name: Run tests
+        if: env.SHOULD_RELEASE == 'true'
+        run: cargo test --all --locked
+
+      - name: Install required Rust targets (macOS)
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          rustup target add x86_64-apple-darwin
+          rustup target add aarch64-apple-darwin
+
+      - name: Build macOS x86_64
+        if: env.SHOULD_RELEASE == 'true'
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: Build macOS ARM64
+        if: env.SHOULD_RELEASE == 'true'
+        run: cargo build --release --target aarch64-apple-darwin
+
+      - name: Archive macOS x86_64 binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: zip lets-do-it-macos-x86_64.zip target/x86_64-apple-darwin/release/lets-do-it
+
+      - name: Archive macOS ARM64 binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: zip lets-do-it-macos-arm64.zip target/aarch64-apple-darwin/release/lets-do-it
+
+      - name: Upload macOS x86_64 zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lets-do-it-macos-x86_64
+          path: lets-do-it-macos-x86_64.zip
+
+      - name: Upload macOS ARM64 zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lets-do-it-macos-arm64
+          path: lets-do-it-macos-arm64.zip
+
+  build-linux-windows:
+    runs-on: ubuntu-latest
+    outputs:
+      new-tag: ${{ steps.version.outputs.NEW_TAG }}
+      should-release: ${{ steps.version.outputs.SHOULD_RELEASE }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.85.0
+          override: true
+
+      - name: Check Cargo version bump (Linux/Windows)
+        id: version
+        run: |
+          set -e
+          CARGO_VERSION=$(grep -m1 '^version\s*=\s*"' Cargo.toml | sed -E 's/.*"([0-9]+\.[0-9]+\.[0-9]+)".*/\1/')
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
+          SHOULD_RELEASE=false
+          if [ -z "$LATEST_TAG" ]; then
+            SHOULD_RELEASE=true
+          else
+            LATEST_VER=${LATEST_TAG#v}
+            if [ "v$CARGO_VERSION" = "$LATEST_TAG" ]; then
+              SHOULD_RELEASE=false
+            else
+              top=$(printf '%s\n' "$LATEST_VER" "$CARGO_VERSION" | sort -V | tail -n1)
+              if [ "$top" = "$CARGO_VERSION" ]; then
+                SHOULD_RELEASE=true
+              fi
+            fi
+          fi
+          echo "CARGO_VERSION=$CARGO_VERSION" >> $GITHUB_ENV
+          echo "LATEST_TAG=${LATEST_TAG:-}" >> $GITHUB_ENV
+          echo "NEW_TAG=v$CARGO_VERSION" >> $GITHUB_ENV
+          echo "SHOULD_RELEASE=$SHOULD_RELEASE" >> $GITHUB_ENV
+          echo "NEW_TAG=v$CARGO_VERSION" >> $GITHUB_OUTPUT
+          echo "SHOULD_RELEASE=$SHOULD_RELEASE" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        if: env.SHOULD_RELEASE == 'true'
+        run: cargo test --all --locked
+
+      - name: Generate release notes with Gemini
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          echo "Fetching commits..."
+
+          # Ensure fallback if no previous tag exists
+          if [ -z "$LATEST_TAG" ]; then
+            # Leave LATEST_TAG empty; we'll fetch all history below if needed
+            LATEST_TAG=""
+          fi
+
+          if [ -n "$LATEST_TAG" ]; then
+            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s")
+          else
+            COMMITS=$(git log --pretty=format:"- %s")
+          fi
+
+          PROMPT=$(printf "Summarise the following commit messages into a clear and concise changelog:\n%s" "$COMMITS")
+          echo "PROMPT:"
+          echo "$PROMPT"
+
+          JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            '{
+              contents: [{
+                role: "user",
+                parts: [{ text: $prompt }]
+              }]
+            }')
+
+          curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent" \
+            -H "Content-Type: application/json" \
+            -H "X-goog-api-key: ${{ secrets.GEMINI_API_KEY }}" \
+            -d "$JSON" \
+            | tee full-response.json \
+            | jq -r '.candidates[0].content.parts[0].text' > release-notes.md
+
+      - name: Push new tag
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
+
+      - name: Install required Rust targets (Linux and Windows)
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          rustup target add x86_64-unknown-linux-musl
+          rustup target add x86_64-pc-windows-gnu
+
+      - name: Build Linux binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          cargo build --release --target x86_64-unknown-linux-musl
+
+      - name: Build Windows x86_64
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          sudo apt-get update && sudo apt-get install -y mingw-w64
+          cargo build --release --target x86_64-pc-windows-gnu
+
+      - name: Zip Linux binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          mkdir -p dist
+          cp target/x86_64-unknown-linux-musl/release/lets-do-it dist/
+          cd dist && zip ../lets-do-it-linux-x86_64.zip lets-do-it && cd ..
+          rm -rf dist
+
+      - name: Zip Windows binary
+        if: env.SHOULD_RELEASE == 'true'
+        run: |
+          mkdir -p dist
+          cp target/x86_64-pc-windows-gnu/release/lets-do-it.exe dist/
+          cd dist && zip ../lets-do-it-windows-x86_64.zip lets-do-it.exe && cd ..
+          rm -rf dist
+
+      - name: Upload Linux zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lets-do-it-linux-x86_64
+          path: lets-do-it-linux-x86_64.zip
+
+      - name: Upload Windows zip
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lets-do-it-windows-x86_64
+          path: lets-do-it-windows-x86_64.zip
+
+      - name: Upload release notes
+        if: env.SHOULD_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: release-notes.md
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build-macos, build-linux-windows]
+    if: needs.build-linux-windows.outputs.should-release == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create GitHub Release with gh CLI
+        run: |
+          NEW_TAG="${{ needs.build-linux-windows.outputs.new-tag }}"
+          echo "Creating release $NEW_TAG..."
+          gh release create "$NEW_TAG" \
+            --title "Release $NEW_TAG" \
+            --notes-file release-notes.md \
+            lets-do-it-linux-x86_64.zip \
+            lets-do-it-windows-x86_64.zip \
+            lets-do-it-macos-x86_64.zip \
+            lets-do-it-macos-arm64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
