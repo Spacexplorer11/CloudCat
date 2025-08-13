@@ -1,4 +1,4 @@
-name: Release Let's Do It
+name: Release CloudCat
 
 on:
   push:
@@ -63,25 +63,25 @@ jobs:
 
       - name: Archive macOS x86_64 binary
         if: env.SHOULD_RELEASE == 'true'
-        run: zip lets-do-it-macos-x86_64.zip target/x86_64-apple-darwin/release/lets-do-it
+        run: zip cloudcat-macos-x86_64.zip target/x86_64-apple-darwin/release/cloudcat
 
       - name: Archive macOS ARM64 binary
         if: env.SHOULD_RELEASE == 'true'
-        run: zip lets-do-it-macos-arm64.zip target/aarch64-apple-darwin/release/lets-do-it
+        run: zip cloudcat-macos-arm64.zip target/aarch64-apple-darwin/release/cloudcat
 
       - name: Upload macOS x86_64 zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: lets-do-it-macos-x86_64
-          path: lets-do-it-macos-x86_64.zip
+          name: cloudcat-macos-x86_64
+          path: cloudcat-macos-x86_64.zip
 
       - name: Upload macOS ARM64 zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: lets-do-it-macos-arm64
-          path: lets-do-it-macos-arm64.zip
+          name: cloudcat-macos-arm64
+          path: cloudcat-macos-arm64.zip
 
   build-linux-windows:
     runs-on: ubuntu-latest
@@ -193,31 +193,31 @@ jobs:
         if: env.SHOULD_RELEASE == 'true'
         run: |
           mkdir -p dist
-          cp target/x86_64-unknown-linux-musl/release/lets-do-it dist/
-          cd dist && zip ../lets-do-it-linux-x86_64.zip lets-do-it && cd ..
+          cp target/x86_64-unknown-linux-musl/release/cloudcat dist/
+          cd dist && zip ../cloudcat-linux-x86_64.zip cloudcat && cd ..
           rm -rf dist
 
       - name: Zip Windows binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
           mkdir -p dist
-          cp target/x86_64-pc-windows-gnu/release/lets-do-it.exe dist/
-          cd dist && zip ../lets-do-it-windows-x86_64.zip lets-do-it.exe && cd ..
+          cp target/x86_64-pc-windows-gnu/release/cloudcat.exe dist/
+          cd dist && zip ../cloudcat-windows-x86_64.zip cloudcat.exe && cd ..
           rm -rf dist
 
       - name: Upload Linux zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: lets-do-it-linux-x86_64
-          path: lets-do-it-linux-x86_64.zip
+          name: cloudcat-linux-x86_64
+          path: cloudcat-linux-x86_64.zip
 
       - name: Upload Windows zip
         if: env.SHOULD_RELEASE == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: lets-do-it-windows-x86_64
-          path: lets-do-it-windows-x86_64.zip
+          name: cloudcat-windows-x86_64
+          path: cloudcat-windows-x86_64.zip
 
       - name: Upload release notes
         if: env.SHOULD_RELEASE == 'true'
@@ -245,9 +245,9 @@ jobs:
           gh release create "$NEW_TAG" \
             --title "Release $NEW_TAG" \
             --notes-file release-notes.md \
-            lets-do-it-linux-x86_64.zip \
-            lets-do-it-windows-x86_64.zip \
-            lets-do-it-macos-x86_64.zip \
-            lets-do-it-macos-arm64.zip
+            cloudcat-linux-x86_64.zip \
+            cloudcat-windows-x86_64.zip \
+            cloudcat-macos-x86_64.zip \
+            cloudcat-macos-arm64.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
