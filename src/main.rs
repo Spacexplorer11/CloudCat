@@ -1,18 +1,29 @@
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
+use std::env;
 use std::fs;
+use std::path::PathBuf;
 
 #[macroquad::main("CloudCat")]
 async fn main() {
+    let exe_dir = env::current_exe().unwrap().parent().unwrap().to_path_buf();
+
     let mut rng = rng();
 
-    let cat: Texture2D = load_texture("assets/cat.png").await.unwrap();
+    let cat_path: PathBuf = exe_dir.join("assets/cat.png");
+    let cat: Texture2D = load_texture(cat_path.to_str().unwrap()).await.unwrap();
     cat.set_filter(FilterMode::Nearest);
-    let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
+
+    let cloud_path: PathBuf = exe_dir.join("assets/cloud.png");
+    let cloud: Texture2D = load_texture(cloud_path.to_str().unwrap()).await.unwrap();
     cloud.set_filter(FilterMode::Nearest);
-    let floor_tex: Texture2D = load_texture("assets/floor.png").await.unwrap();
+
+    let floor_path: PathBuf = exe_dir.join("assets/floor.png");
+    let floor_tex: Texture2D = load_texture(floor_path.to_str().unwrap()).await.unwrap();
     floor_tex.set_filter(FilterMode::Nearest);
-    let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
+
+    let umbrella_path: PathBuf = exe_dir.join("assets/umbrella.png");
+    let umbrella: Texture2D = load_texture(umbrella_path.to_str().unwrap()).await.unwrap();
     umbrella.set_filter(FilterMode::Nearest);
 
     // Catty variables :3
