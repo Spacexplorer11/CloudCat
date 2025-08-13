@@ -9,11 +9,15 @@ keep your fur dry!
 
 ## Why did I make it?
 
-I made this game to have some fun, and to learn Rust! It is my first ever rust project, so don't expect it to be
+I made this game to have some fun, and to learn Rust! It is my first ever rust project (that I started), so don't expect it to be
 perfect.  
-It's made using Bevy, a game engine for Rust, and is heavily inspired by the original chrome dinosaur game.
+It's made using Macroquad, a game library for Rust, and is heavily inspired by the original chrome dinosaur game.
 
 ## How do I play?
 
-I haven't even made it yet so uhh, come back later and it should be made soon™.  
-Exact date: Before Sep 2025. 100% guaranteed
+You just download the [latest release](https://github.com/Spacexplorer11/CloudCat/releases/latest) for your OS!
+Just click `Space` on your keyboard to activate the umbrella, and thats all you need to do!  
+Your highscore is automatically saved/loaded.  
+>[!CAUTION]
+> Your highscore is only saved when your game is over and you've reached the game over screen
+> **NOT** when quitting at any point.
