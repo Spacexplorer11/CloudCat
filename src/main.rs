@@ -1,11 +1,11 @@
-use ::rand::{Rng, thread_rng};
+use ::rand::{Rng, rng};
 use macroquad::prelude::*;
+use std::fs;
 
 #[macroquad::main("CloudCat")]
 async fn main() {
-    let mut rng = thread_rng();
+    let mut rng = rng();
 
-    // Load textures once to avoid per-frame loading slowdowns
     let cat: Texture2D = load_texture("assets/cat.png").await.unwrap();
     cat.set_filter(FilterMode::Nearest);
     let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
@@ -34,8 +34,10 @@ async fn main() {
     // Game OVER RAWHHH >:)
     let mut game_over = false;
 
-    // Score RAWH
+    // Score & Highscore RAWH
     let mut score = 0;
+    let highscore = load_highscore();
+
     loop {
         if game_over {
             clear_background(RED);
@@ -67,6 +69,24 @@ async fn main() {
             DARKGRAY,
         );
 
+        if score < highscore {
+            draw_text(
+                &format!("Your highscore is {}", highscore),
+                screen_width() * 0.01,
+                50.0,
+                50.0,
+                DARKGRAY,
+            );
+        } else if score >= highscore {
+            draw_text(
+                &format!("Your previous highscore was {}", highscore),
+                0.0,
+                50.0,
+                40.0,
+                DARKGRAY,
+            );
+        }
+
         if is_key_pressed(KeyCode::Space) {
             if umbrella_start_time == 0.0 || get_time() - umbrella_start_time > 3.0 {
                 umbrella_start_time = get_time();
@@ -79,7 +99,7 @@ async fn main() {
 
         cloud_x -= 0.125 / cat_run_speed;
         if cloud_x < -192.0 {
-            cloud_x = screen_width() + rng.gen_range(150.0..=200.0);
+            cloud_x = screen_width() + rng.random_range(150.0..=200.0);
         }
 
         (cloud_timer, cloud_frame) = draw_cloud(&cloud, cloud_timer, cloud_frame, cloud_x).await;
@@ -100,6 +120,7 @@ async fn main() {
 
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
+            fs::write("score.txt", score.to_string()).unwrap();
         }
 
         score += 1;
@@ -210,4 +231,11 @@ async fn draw_umbrella(umbrella: &Texture2D) {
             ..Default::default()
         },
     );
+}
+
+fn load_highscore() -> i32 {
+    match fs::read_to_string("score.txt") {
+        Ok(s) => s.trim().parse::<i32>().unwrap_or(0),
+        Err(_) => 0,
+    }
 }
