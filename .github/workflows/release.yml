@@ -70,11 +70,17 @@ jobs:
 
       - name: Archive macOS x86_64 binary
         if: env.SHOULD_RELEASE == 'true'
-        run: zip cloudcat-macos-x86_64.zip target/x86_64-apple-darwin/release/cloudcat
+        run: |
+          cd target/x86_64-apple-darwin/release
+          zip -r cloudcat-macos-x86_64.zip cloudcat assets
+          mv cloudcat-macos-x86_64.zip ../../../
 
       - name: Archive macOS ARM64 binary
         if: env.SHOULD_RELEASE == 'true'
-        run: zip cloudcat-macos-arm64.zip target/aarch64-apple-darwin/release/cloudcat
+        run: |
+          cd target/aarch64-apple-darwin/release
+          zip -r cloudcat-macos-arm64.zip cloudcat assets
+          mv cloudcat-macos-arm64.zip ../../../
 
       - name: Upload macOS x86_64 zip
         if: env.SHOULD_RELEASE == 'true'
@@ -201,18 +207,16 @@ jobs:
       - name: Zip Linux binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
-          mkdir -p dist
-          cp target/x86_64-unknown-linux-musl/release/cloudcat dist/
-          cd dist && zip ../cloudcat-linux-x86_64.zip cloudcat && cd ..
-          rm -rf dist
+          cd target/x86_64-unknown-linux-musl/release
+          zip -r cloudcat-linux-x86_64.zip cloudcat assets
+          mv cloudcat-linux-x86_64.zip ../../../
 
       - name: Zip Windows binary
         if: env.SHOULD_RELEASE == 'true'
         run: |
-          mkdir -p dist
-          cp target/x86_64-pc-windows-gnu/release/cloudcat.exe dist/
-          cd dist && zip ../cloudcat-windows-x86_64.zip cloudcat.exe && cd ..
-          rm -rf dist
+          cd target/x86_64-pc-windows-gnu/release
+          zip -r cloudcat-windows-x86_64.zip cloudcat.exe assets
+          mv cloudcat-windows-x86_64.zip ../../../
 
       - name: Upload Linux zip
         if: env.SHOULD_RELEASE == 'true'
