@@ -46,7 +46,7 @@ async fn main() {
     let mut game_over = false;
 
     // Score & Highscore RAWH
-    let mut score = 0;
+    let mut score = 0.0;
     let highscore = load_highscore();
 
     loop {
@@ -70,17 +70,21 @@ async fn main() {
             continue;
         }
 
+        let dt = get_frame_time();
+
         clear_background(WHITE);
 
+        let score_i32 = score as i32;
+
         draw_text(
-            &format!("Score: {}", score),
+            &format!("Score: {}", score_i32),
             screen_width() * 0.7,
             50.0,
             50.0,
             DARKGRAY,
         );
 
-        if score < highscore {
+        if score_i32 < highscore {
             draw_text(
                 &format!("Your highscore is {}", highscore),
                 screen_width() * 0.01,
@@ -88,7 +92,7 @@ async fn main() {
                 50.0,
                 DARKGRAY,
             );
-        } else if score >= highscore {
+        } else {
             draw_text(
                 &format!("Your previous highscore was {}", highscore),
                 0.0,
@@ -105,10 +109,12 @@ async fn main() {
         }
 
         if cat_run_speed > 0.01 {
-            cat_run_speed -= 0.00001;
+            cat_run_speed -= 0.0006 * dt;
         }
 
-        cloud_x -= 0.125 / cat_run_speed;
+        let scroll_speed = 7.5 / cat_run_speed;
+
+        cloud_x -= scroll_speed * dt;
         if cloud_x < -192.0 {
             cloud_x = screen_width() + rng.random_range(150.0..=200.0);
         }
@@ -124,17 +130,17 @@ async fn main() {
 
         draw_floor(&floor_tex, floor_x).await;
 
-        floor_x -= 0.125 / cat_run_speed;
+        floor_x -= scroll_speed * dt;
         if floor_x <= -screen_width() {
             floor_x = 0.0;
         }
 
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
-            fs::write("score.txt", score.to_string()).unwrap();
+            fs::write("score.txt", score_i32.to_string()).unwrap();
         }
 
-        score += 1;
+        score += 60.0 * dt;
 
         next_frame().await;
     }
