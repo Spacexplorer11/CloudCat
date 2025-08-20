@@ -46,7 +46,7 @@ async fn main() {
     let mut game_over = false;
 
     // Score & Highscore RAWH
-    let mut score: f32 = 0.0;
+    let mut score = 0.0;
     let highscore = load_highscore();
 
     loop {
@@ -110,9 +110,6 @@ async fn main() {
 
         if cat_run_speed > 0.01 {
             cat_run_speed -= 0.0006 * dt;
-            if cat_run_speed < 0.01 {
-                cat_run_speed = 0.01;
-            }
         }
 
         let scroll_speed = 7.5 / cat_run_speed;
