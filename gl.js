@@ -1310,15 +1310,16 @@ var importObject = {
             };
             window.addEventListener("copy", function (e) {
                 if (clipboard != null) {
-                    event.clipboardData.setData('text/plain', clipboard);
-                    event.preventDefault();
+                    e.clipboardData.setData('text/plain', clipboard);
+                    e.preventDefault();
                 }
             });
             window.addEventListener("cut", function (e) {
                 if (clipboard != null) {
-                    event.clipboardData.setData('text/plain', clipboard);
-                    event.preventDefault();
+                    e.clipboardData.setData('text/plain', clipboard);
+                    e.preventDefault();
                 }
+            });
             });
 
             window.addEventListener("paste", function (e) {
