@@ -1,8 +1,8 @@
+#[cfg(not(target_arch = "wasm32"))]
+use ::rand::{Rng, rng};
 use macroquad::prelude::*;
 #[cfg(not(target_arch = "wasm32"))]
 use std::fs;
-#[cfg(not(target_arch = "wasm32"))]
-use ::rand::{Rng, rng};
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
@@ -14,7 +14,7 @@ use web_sys::*;
 extern "C" {
     #[wasm_bindgen(js_namespace = localStorage)]
     fn getItem(key: &str) -> Option<String>;
-    
+
     #[wasm_bindgen(js_namespace = localStorage)]
     fn setItem(key: &str, value: &str);
 }
@@ -75,12 +75,12 @@ async fn main() {
                 get_responsive_text_size(100.0),
                 DARKGRAY,
             );
-            
+
             #[cfg(target_arch = "wasm32")]
             let restart_message = "Please refresh the page to play again";
             #[cfg(not(target_arch = "wasm32"))]
             let restart_message = "Please restart the game to play again";
-            
+
             draw_text(
                 restart_message,
                 screen_width() * 0.2,
@@ -166,7 +166,9 @@ async fn main() {
 
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
-            save_highscore(score_i32);
+            if score_i32 > highscore {
+                save_highscore(score_i32);
+            }
         }
 
         score += 60.0 * dt;
