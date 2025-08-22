@@ -1,29 +1,45 @@
+#[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
-use std::env;
+#[cfg(not(target_arch = "wasm32"))]
 use std::fs;
-use std::path::PathBuf;
+
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use web_sys::*;
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = localStorage)]
+    fn getItem(key: &str) -> Option<String>;
+
+    #[wasm_bindgen(js_namespace = localStorage)]
+    fn setItem(key: &str, value: &str);
+}
+
+fn get_responsive_text_size(base_size: f32) -> f32 {
+    let min_dimension = screen_width().min(screen_height());
+    let scale_factor = (min_dimension / 800.0).max(0.4).min(1.5);
+    base_size * scale_factor
+}
 
 #[macroquad::main("CloudCat")]
 async fn main() {
-    let exe_dir = env::current_exe().unwrap().parent().unwrap().to_path_buf();
-
+    #[cfg(not(target_arch = "wasm32"))]
     let mut rng = rng();
 
-    let cat_path: PathBuf = exe_dir.join("assets/cat.png");
-    let cat: Texture2D = load_texture(cat_path.to_str().unwrap()).await.unwrap();
+    let cat: Texture2D = load_texture("assets/cat.png").await.unwrap();
     cat.set_filter(FilterMode::Nearest);
 
-    let cloud_path: PathBuf = exe_dir.join("assets/cloud.png");
-    let cloud: Texture2D = load_texture(cloud_path.to_str().unwrap()).await.unwrap();
+    let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
     cloud.set_filter(FilterMode::Nearest);
 
-    let floor_path: PathBuf = exe_dir.join("assets/floor.png");
-    let floor_tex: Texture2D = load_texture(floor_path.to_str().unwrap()).await.unwrap();
+    let floor_tex: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_tex.set_filter(FilterMode::Nearest);
 
-    let umbrella_path: PathBuf = exe_dir.join("assets/umbrella.png");
-    let umbrella: Texture2D = load_texture(umbrella_path.to_str().unwrap()).await.unwrap();
+    let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
     umbrella.set_filter(FilterMode::Nearest);
 
     // Catty variables :3
@@ -56,14 +72,20 @@ async fn main() {
                 "GAME OVER",
                 screen_width() * 0.25,
                 screen_height() * 0.5,
-                100.0,
+                get_responsive_text_size(100.0),
                 DARKGRAY,
             );
+
+            #[cfg(target_arch = "wasm32")]
+            let restart_message = "Please refresh the page to play again";
+            #[cfg(not(target_arch = "wasm32"))]
+            let restart_message = "Please restart the game to play again";
+
             draw_text(
-                "Please restart the game to play again",
+                restart_message,
                 screen_width() * 0.2,
                 screen_height() * 0.7,
-                30.0,
+                get_responsive_text_size(30.0),
                 DARKGRAY,
             );
             next_frame().await;
@@ -80,7 +102,7 @@ async fn main() {
             &format!("Score: {}", score_i32),
             screen_width() * 0.7,
             50.0,
-            50.0,
+            get_responsive_text_size(50.0),
             DARKGRAY,
         );
 
@@ -89,7 +111,7 @@ async fn main() {
                 &format!("Your highscore is {}", highscore),
                 screen_width() * 0.01,
                 50.0,
-                50.0,
+                get_responsive_text_size(50.0),
                 DARKGRAY,
             );
         } else {
@@ -97,12 +119,12 @@ async fn main() {
                 &format!("Your previous highscore was {}", highscore),
                 0.0,
                 50.0,
-                40.0,
+                get_responsive_text_size(40.0),
                 DARKGRAY,
             );
         }
 
-        if is_key_pressed(KeyCode::Space) {
+        if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
             if umbrella_start_time == 0.0 || get_time() - umbrella_start_time > 3.0 {
                 umbrella_start_time = get_time();
             }
@@ -116,7 +138,14 @@ async fn main() {
 
         cloud_x -= scroll_speed * dt;
         if cloud_x < -192.0 {
-            cloud_x = screen_width() + rng.random_range(150.0..=200.0);
+            #[cfg(not(target_arch = "wasm32"))]
+            {
+                cloud_x = screen_width() + rng.random_range(150.0..=200.0);
+            }
+            #[cfg(target_arch = "wasm32")]
+            {
+                cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
+            }
         }
 
         (cloud_timer, cloud_frame) = draw_cloud(&cloud, cloud_timer, cloud_frame, cloud_x).await;
@@ -137,7 +166,9 @@ async fn main() {
 
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
-            fs::write("score.txt", score_i32.to_string()).unwrap();
+            if score_i32 > highscore {
+                save_highscore(score_i32);
+            }
         }
 
         score += 60.0 * dt;
@@ -251,8 +282,29 @@ async fn draw_umbrella(umbrella: &Texture2D) {
 }
 
 fn load_highscore() -> i32 {
-    match fs::read_to_string("score.txt") {
-        Ok(s) => s.trim().parse::<i32>().unwrap_or(0),
-        Err(_) => 0,
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        match fs::read_to_string("score.txt") {
+            Ok(s) => s.trim().parse::<i32>().unwrap_or(0),
+            Err(_) => 0,
+        }
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        match getItem("cloudcat_highscore") {
+            Some(s) => s.parse::<i32>().unwrap_or(0),
+            None => 0,
+        }
+    }
+}
+
+fn save_highscore(score: i32) {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = fs::write("score.txt", score.to_string());
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        setItem("cloudcat_highscore", &score.to_string());
     }
 }
