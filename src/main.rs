@@ -144,7 +144,7 @@ async fn main() {
             }
             #[cfg(target_arch = "wasm32")]
             {
-                cloud_x = screen_width() + js_random_range(150.0, 200.0);
+                cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
             }
         }
 
