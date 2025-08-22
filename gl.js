@@ -6,9 +6,16 @@
 //
 // TODO: split to gl.js and loader.js
 
+/*
+Purpose of gl.js:
+- Bootstraps a WebAssembly (WASM) module produced by the Rust project (Miniquad-based app), wiring it to WebGL and browser APIs.
+- Provides a compatibility layer that emulates Emscripten/Miniquad WebGL bindings so the Rust code can call into JS for rendering, I/O, timing and events.
+- Initializes WebGL1/WebGL2 contexts and related extensions, forwards input events (mouse, touch, keyboard, gamepad), handles canvas resizing/high-DPI, clipboard, fullscreen and pointer lock, and runs the main frame loop.
+- Loads the WASM module, validates version compatibility, exposes imported env functions, and starts the Rust main() entry point.
+*/
 "use strict";
 
-const version = 2;
+const GL_JS_VERSION = 2;
 
 const canvas = document.querySelector("#glcanvas");
 var gl;
@@ -409,7 +416,7 @@ function _webglGet(name_, p, type) {
     }
 
     switch (type) {
-        case 'EM_FUNC_SIG_PARAM_I64': getArray(p, Int32Array, 1)[0] = ret;
+        case 'EM_FUNC_SIG_PARAM_I64': getArray(p, Int32Array, 1)[0] = ret; /* falls through */
         case 'EM_FUNC_SIG_PARAM_I': getArray(p, Int32Array, 1)[0] = ret; break;
         case 'EM_FUNC_SIG_PARAM_F': getArray(p, Float32Array, 1)[0] = ret; break;
         case 'EM_FUNC_SIG_PARAM_B': getArray(p, Int8Array, 1)[0] = ret ? 1 : 0; break;
@@ -919,13 +926,13 @@ var importObject = {
                 getArray(p, Int32Array, 1)[0] = log.length + 1;
             } else if (pname == 0x8B87 /* GL_ACTIVE_UNIFORM_MAX_LENGTH */) {
                 console.error("unsupported operation");
-                return;
+
             } else if (pname == 0x8B8A /* GL_ACTIVE_ATTRIBUTE_MAX_LENGTH */) {
                 console.error("unsupported operation");
-                return;
+
             } else if (pname == 0x8A35 /* GL_ACTIVE_UNIFORM_BLOCK_MAX_NAME_LENGTH */) {
                 console.error("unsupported operation");
-                return;
+
             } else {
                 getArray(p, Int32Array, 1)[0] = gl.getProgramParameter(GL.programs[program], pname);
             }
@@ -1320,7 +1327,6 @@ var importObject = {
                     e.preventDefault();
                 }
             });
-            });
 
             window.addEventListener("paste", function (e) {
                 e.stopPropagation();
@@ -1512,7 +1518,7 @@ function miniquad_add_plugin(plugin) {
 // read module imports and create fake functions in import object
 // this is will allow to successfeully link wasm even with wrong version of gl.js
 // needed to workaround firefox bug with lost error on wasm linking errors
-function add_missing_functions_stabs(obj) {
+function add_missing_functions_stubs(obj) {
     var imports = WebAssembly.Module.imports(obj);
 
     for (const i in imports) {
@@ -1533,7 +1539,7 @@ function load(wasm_path) {
     if (typeof WebAssembly.compileStreaming === 'function') {
         WebAssembly.compileStreaming(req)
             .then(obj => {
-                add_missing_functions_stabs(obj);
+                add_missing_functions_stubs(obj);
                 return WebAssembly.instantiate(obj, importObject);
             })
             .then(
@@ -1542,9 +1548,9 @@ function load(wasm_path) {
                     wasm_exports = obj.exports;
 
                     var crate_version = wasm_exports.crate_version();
-                    if (version != crate_version) {
+                    if (GL_JS_VERSION != crate_version) {
                         console.error(
-                            "Version mismatch: gl.js version is: " + version +
+                            "Version mismatch: gl.js version is: " + GL_JS_VERSION +
                             ", miniquad crate version is: " + crate_version);
                     }
                     init_plugins(plugins);
@@ -1558,7 +1564,7 @@ function load(wasm_path) {
             .then(function (x) { return x.arrayBuffer(); })
             .then(function (bytes) { return WebAssembly.compile(bytes); })
             .then(function (obj) {
-                add_missing_functions_stabs(obj);
+                add_missing_functions_stubs(obj);
                 return WebAssembly.instantiate(obj, importObject);
             })
             .then(function (obj) {
@@ -1566,9 +1572,9 @@ function load(wasm_path) {
                 wasm_exports = obj.exports;
 
                 var crate_version = wasm_exports.crate_version();
-                if (version != crate_version) {
+                if (GL_JS_VERSION != crate_version) {
                     console.error(
-                        "Version mismatch: gl.js version is: " + version +
+                        "Version mismatch: gl.js version is: " + GL_JS_VERSION +
                         ", rust sapp-wasm crate version is: " + crate_version);
                 }
                 init_plugins(plugins);
