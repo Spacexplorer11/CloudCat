@@ -145,7 +145,7 @@ async fn main() {
             }
             #[cfg(target_arch = "wasm32")]
             {
-                collections::storage::store(score_i32);
+                // For web, just continue without storing - localStorage would need additional JS bindings
             }
         }
 
@@ -269,7 +269,7 @@ fn load_highscore() -> i32 {
     }
     #[cfg(target_arch = "wasm32")]
     {
-        let stored_score: i32 = *collections::storage::get();
-        stored_score
+        // For web, just return 0 for now - localStorage access would need additional JS bindings
+        0
     }
 }
