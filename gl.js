@@ -1118,7 +1118,7 @@ var importObject = {
         },
         glDeleteQueries: function (n, ids) {
             for (var i = 0; i < n; i++) {
-                var id = getArray(textures + i * 4, Uint32Array, 1)[0];
+                var id = getArray(ids + i * 4, Uint32Array, 1)[0];
                 var query = GL.timerQueries[id];
                 if (!query) {
                     continue;
