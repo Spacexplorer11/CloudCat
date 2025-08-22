@@ -239,8 +239,8 @@ window.miniquad = {
             gl.uniformMatrix4fv(location, transpose, data);
         },
         
-        glGenTextures: function(n, textures) {
-            let view = new Uint32Array(window.miniquad.wasm_exports.memory.buffer, textures, n);
+        glGenTextures: function(n, out_ptr) {
+            let view = new Uint32Array(window.miniquad.wasm_exports.memory.buffer, out_ptr, n);
             for (let i = 0; i < n; i++) {
                 let texture = gl.createTexture();
                 let id = getId();
