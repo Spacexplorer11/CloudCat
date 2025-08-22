@@ -15,8 +15,8 @@ It's made using Macroquad, a game library for Rust, and is heavily inspired by t
 
 ## How do I play?
 
-You just download the [latest release](https://github.com/Spacexplorer11/CloudCat/releases/latest) for your OS!
-Just click `Space` on your keyboard to activate the umbrella, and thats all you need to do!  
+You just download the [latest release](https://github.com/Spacexplorer11/CloudCat/releases/latest) for your OS, or [play it in your browser](https://spacexplorer11.github.io/CloudCat/)!
+Just press `Space` on your keyboard or click/tap the screen to activate the umbrella, and thats all you need to do!  
 Your highscore is automatically saved/loaded.  
 >[!CAUTION]
 > Your highscore is only saved when your game is over and you've reached the game over screen
