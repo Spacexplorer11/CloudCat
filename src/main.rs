@@ -4,6 +4,27 @@ use std::fs;
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use web_sys::*;
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = localStorage)]
+    fn getItem(key: &str) -> Option<String>;
+    
+    #[wasm_bindgen(js_namespace = localStorage)]
+    fn setItem(key: &str, value: &str);
+}
+
+fn get_responsive_text_size(base_size: f32) -> f32 {
+    let min_dimension = screen_width().min(screen_height());
+    let scale_factor = (min_dimension / 800.0).max(0.4).min(1.5);
+    base_size * scale_factor
+}
+
 #[macroquad::main("CloudCat")]
 async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
@@ -51,14 +72,20 @@ async fn main() {
                 "GAME OVER",
                 screen_width() * 0.25,
                 screen_height() * 0.5,
-                100.0,
+                get_responsive_text_size(100.0),
                 DARKGRAY,
             );
+            
+            #[cfg(target_arch = "wasm32")]
+            let restart_message = "Please refresh the page to play again";
+            #[cfg(not(target_arch = "wasm32"))]
+            let restart_message = "Please restart the game to play again";
+            
             draw_text(
-                "Please restart the game to play again",
+                restart_message,
                 screen_width() * 0.2,
                 screen_height() * 0.7,
-                30.0,
+                get_responsive_text_size(30.0),
                 DARKGRAY,
             );
             next_frame().await;
@@ -75,7 +102,7 @@ async fn main() {
             &format!("Score: {}", score_i32),
             screen_width() * 0.7,
             50.0,
-            50.0,
+            get_responsive_text_size(50.0),
             DARKGRAY,
         );
 
@@ -84,7 +111,7 @@ async fn main() {
                 &format!("Your highscore is {}", highscore),
                 screen_width() * 0.01,
                 50.0,
-                50.0,
+                get_responsive_text_size(50.0),
                 DARKGRAY,
             );
         } else {
@@ -92,7 +119,7 @@ async fn main() {
                 &format!("Your previous highscore was {}", highscore),
                 0.0,
                 50.0,
-                40.0,
+                get_responsive_text_size(40.0),
                 DARKGRAY,
             );
         }
@@ -139,14 +166,7 @@ async fn main() {
 
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                fs::write("score.txt", score_i32.to_string()).unwrap();
-            }
-            #[cfg(target_arch = "wasm32")]
-            {
-                // For web, just continue without storing - localStorage would need additional JS bindings
-            }
+            save_highscore(score_i32);
         }
 
         score += 60.0 * dt;
@@ -269,7 +289,20 @@ fn load_highscore() -> i32 {
     }
     #[cfg(target_arch = "wasm32")]
     {
-        // For web, just return 0 for now - localStorage access would need additional JS bindings
-        0
+        match getItem("cloudcat_highscore") {
+            Some(s) => s.parse::<i32>().unwrap_or(0),
+            None => 0,
+        }
+    }
+}
+
+fn save_highscore(score: i32) {
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = fs::write("score.txt", score.to_string());
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        setItem("cloudcat_highscore", &score.to_string());
     }
 }
