@@ -180,8 +180,8 @@ window.miniquad = {
             return id;
         },
         
-        glGenBuffers: function(n, buffers) {
-            let view = new Uint32Array(window.miniquad.wasm_exports.memory.buffer, buffers, n);
+        glGenBuffers: function(n, out_ptr) {
+            let view = new Uint32Array(window.miniquad.wasm_exports.memory.buffer, out_ptr, n);
             for (let i = 0; i < n; i++) {
                 let buffer = gl.createBuffer();
                 let id = getId();
