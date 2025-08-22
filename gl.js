@@ -1466,7 +1466,11 @@ var importObject = {
             animation_frame_timeout = window.requestAnimationFrame(animation);
         },
         init_webgl
-    }
+    },
+    __wbindgen_placeholder__: {},
+    __wbindgen_placeholder: {},
+    wbg: {},
+    wasi_snapshot_preview1: {}
 };
 
 
@@ -1522,10 +1526,16 @@ function add_missing_functions_stubs(obj) {
     var imports = WebAssembly.Module.imports(obj);
 
     for (const i in imports) {
-        if (importObject["env"][imports[i].name] == undefined) {
-            console.warn("No " + imports[i].name + " function in gl.js");
-            importObject["env"][imports[i].name] = function () {
-                console.warn("Missed function: " + imports[i].name);
+        const mod = imports[i].module || "env";
+        const name = imports[i].name;
+        if (importObject[mod] === undefined) {
+            // Create missing module object so WebAssembly.instantiate sees an object, not undefined
+            importObject[mod] = {};
+        }
+        if (importObject[mod][name] === undefined) {
+            console.warn("No " + mod + ":" + name + " function in gl.js; creating stub.");
+            importObject[mod][name] = function () {
+                console.warn("Missed function called: " + mod + ":" + name);
             };
         }
     }
