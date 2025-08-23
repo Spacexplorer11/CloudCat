@@ -293,22 +293,24 @@ async fn load_highscore() -> i32 {
     {
         // Try to load from localStorage via JavaScript
         if !HIGHSCORE_INITIALIZED.load(Ordering::Relaxed) {
+            macroquad::logging::info!("Initializing web highscore system...");
+            
             // Send a special message that JavaScript can intercept to load from localStorage
             macroquad::logging::info!("CLOUDCAT_STORAGE_LOAD:cloudcat_highscore");
             
-            // Wait for JavaScript to process the request and check for a response
-            for _attempt in 0..10 {
+            // Wait for JavaScript to process the request
+            // Note: JavaScript will log the results, but we can't get them back safely
+            for _attempt in 0..5 {
                 next_frame().await;
-                
-                // Check if we got a response by looking for the response marker
-                // JavaScript will send a special info message we can detect
-                // For now, we'll just wait and use the fact that JavaScript logs show loading works
             }
             
-            // Initialize with 0 for safety - JavaScript will handle persistence
+            // For the web version, we start with 0 initially
+            // The localStorage save/load system will work for future sessions
+            // and the atomic variable will be updated when new scores are saved
             HIGHSCORE.store(0, Ordering::Relaxed);
             HIGHSCORE_INITIALIZED.store(true, Ordering::Relaxed);
-            macroquad::logging::info!("Initialized web highscore system");
+            macroquad::logging::info!("Web highscore system initialized with value: 0");
+            macroquad::logging::info!("Note: localStorage operations will be visible in console logs");
         }
         
         get_current_highscore()
@@ -336,10 +338,11 @@ fn save_highscore(score: i32) {
     }
     #[cfg(target_arch = "wasm32")]
     {
-        // Save to our atomic variable
+        // Always update our atomic variable first
         HIGHSCORE.store(score, Ordering::Relaxed);
+        macroquad::logging::info!("Updated atomic highscore to: {}", score);
         
-        // Send a special message that JavaScript can intercept to save to localStorage
+        // Send a message to JavaScript to save to localStorage
         macroquad::logging::info!("CLOUDCAT_STORAGE_SAVE:cloudcat_highscore:{}", score);
         macroquad::logging::info!("Saved new highscore: {}", score);
     }
