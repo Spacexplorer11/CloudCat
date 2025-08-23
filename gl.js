@@ -633,9 +633,9 @@ var importObject = {
         },
         console_log: function (ptr) {
             var message = UTF8ToString(ptr);
-            console.log(message);
+            console.log("DEBUG: console_log called with:", message);
             
-            // Handle special CloudCat storage messages
+            // Handle special CloudCat storage messages - Updated 2025
             if (message.startsWith("CLOUDCAT_STORAGE_LOAD:")) {
                 var key = message.substring("CLOUDCAT_STORAGE_LOAD:".length);
                 console.log("Processing storage load for key:", key);
@@ -680,7 +680,52 @@ var importObject = {
             }
         },
         console_info: function (ptr) {
-            console.info(UTF8ToString(ptr));
+            var message = UTF8ToString(ptr);
+            console.info(message);
+            
+            // Handle special CloudCat storage messages - Updated 2026
+            if (message.startsWith("CLOUDCAT_STORAGE_LOAD:")) {
+                var key = message.substring("CLOUDCAT_STORAGE_LOAD:".length);
+                console.log("Processing storage load for key:", key);
+                try {
+                    var value = localStorage.getItem(key);
+                    console.log("Retrieved value from localStorage:", value);
+                    if (value !== null) {
+                        var score = parseInt(value, 10);
+                        if (!isNaN(score)) {
+                            // Set the score in the page title so Rust can read it
+                            // Use a specific format that won't interfere with normal titles
+                            document.title = "CloudCat|HIGHSCORE:" + score;
+                            console.log("CLOUDCAT_STORAGE_LOADED:" + key + ":" + score);
+                        }
+                    } else {
+                        // No score found, set title to indicate this
+                        document.title = "CloudCat|HIGHSCORE:NONE";
+                        console.log("No previous highscore found in localStorage");
+                    }
+                } catch (e) {
+                    console.error("Error loading from localStorage:", e);
+                    document.title = "CloudCat|HIGHSCORE:ERROR";
+                }
+            } else if (message.startsWith("CLOUDCAT_STORAGE_SAVE:")) {
+                console.log("Processing storage save message:", message);
+                var parts = message.substring("CLOUDCAT_STORAGE_SAVE:".length).split(":");
+                console.log("Save parts:", parts);
+                if (parts.length === 2) {
+                    var key = parts[0];
+                    var value = parts[1];
+                    console.log("Saving to localStorage:", key, "=", value);
+                    try {
+                        localStorage.setItem(key, value);
+                        console.log("Successfully saved to localStorage: " + key + " = " + value);
+                        // Verify it was saved
+                        var saved = localStorage.getItem(key);
+                        console.log("Verification - retrieved value:", saved);
+                    } catch (e) {
+                        console.error("Error saving to localStorage:", e);
+                    }
+                }
+            }
         },
         console_warn: function (ptr) {
             console.warn(UTF8ToString(ptr));
