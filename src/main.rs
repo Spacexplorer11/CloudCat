@@ -13,8 +13,7 @@ struct HighscoreManager;
 
 impl HighscoreManager {
     fn load() -> u32 {
-        let storage = STORAGE.lock().unwrap();
-        storage.get("cloudcat_highscore").unwrap_or("0".parse().unwrap()).parse::<u32>().unwrap()
+        storage.get("cloudcat_highscore").unwrap_or("0").parse::<u32>().unwrap_or(0)
     }
 
     fn save(score: u32) {
