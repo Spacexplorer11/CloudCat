@@ -1,28 +1,27 @@
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
-#[cfg(not(target_arch = "wasm32"))]
-use std::fs;
-
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
-#[cfg(target_arch = "wasm32")]
-use web_sys::*;
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = localStorage)]
-    fn getItem(key: &str) -> Option<String>;
-
-    #[wasm_bindgen(js_namespace = localStorage)]
-    fn setItem(key: &str, value: &str);
-}
+use quad_storage::STORAGE;
 
 fn get_responsive_text_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
     let scale_factor = (min_dimension / 800.0).max(0.4).min(1.5);
     base_size * scale_factor
+}
+
+struct HighscoreManager;
+
+impl HighscoreManager {
+    fn load() -> u32 {
+        let storage = STORAGE.lock().unwrap();
+        let zero: String = "0".parse().unwrap();
+        storage.get("cloudcat_highscore").unwrap_or(zero).parse::<u32>().unwrap_or(0)
+    }
+
+    fn save(score: u32) {
+        let mut storage = STORAGE.lock().unwrap();
+        storage.set("cloudcat_highscore", &*score.to_string());
+    }
 }
 
 #[macroquad::main("CloudCat")]
@@ -63,7 +62,7 @@ async fn main() {
 
     // Score & Highscore RAWH
     let mut score = 0.0;
-    let highscore = load_highscore();
+    let highscore = HighscoreManager::load();
 
     loop {
         if game_over {
@@ -96,17 +95,17 @@ async fn main() {
 
         clear_background(WHITE);
 
-        let score_i32 = score as i32;
+        let score_u32 = score as u32;
 
         draw_text(
-            &format!("Score: {}", score_i32),
+            &format!("Score: {}", score_u32),
             screen_width() * 0.7,
             50.0,
             get_responsive_text_size(50.0),
             DARKGRAY,
         );
 
-        if score_i32 < highscore {
+        if score_u32 < highscore {
             draw_text(
                 &format!("Your highscore is {}", highscore),
                 screen_width() * 0.01,
@@ -166,8 +165,8 @@ async fn main() {
 
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
-            if score_i32 > highscore {
-                save_highscore(score_i32);
+            if score_u32 > highscore {
+                HighscoreManager::save(score_u32);
             }
         }
 
@@ -279,32 +278,4 @@ async fn draw_umbrella(umbrella: &Texture2D) {
             ..Default::default()
         },
     );
-}
-
-fn load_highscore() -> i32 {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        match fs::read_to_string("score.txt") {
-            Ok(s) => s.trim().parse::<i32>().unwrap_or(0),
-            Err(_) => 0,
-        }
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        match getItem("cloudcat_highscore") {
-            Some(s) => s.parse::<i32>().unwrap_or(0),
-            None => 0,
-        }
-    }
-}
-
-fn save_highscore(score: i32) {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        let _ = fs::write("score.txt", score.to_string());
-    }
-    #[cfg(target_arch = "wasm32")]
-    {
-        setItem("cloudcat_highscore", &score.to_string());
-    }
 }
