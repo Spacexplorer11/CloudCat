@@ -60,11 +60,43 @@ async fn main() {
     // Game OVER RAWHHH >:)
     let mut game_over = false;
 
+    // Has da game started?? mrow :3
+    let mut game_started = false;
+
     // Score & Highscore RAWH
     let mut score = 0.0;
     let highscore = HighscoreManager::load();
 
     loop {
+        if !game_started {
+            clear_background(WHITE);
+            draw_text(
+            "Please click/touch/hit space to put up the umbrella to protect your cat.",
+            screen_width() * 0.01,
+            screen_height() * 0.3,
+            get_responsive_text_size(30.0),
+            DARKGRAY,
+            );
+            draw_text(
+                "The aim of the game is not let your cat get touched by rain",
+                screen_width() * 0.01,
+                screen_height() * 0.4,
+                get_responsive_text_size(40.0),
+                DARKGRAY,
+            );
+            draw_text(
+                "Click any key, tap or click anywhere to start the game",
+                screen_width() * 0.01,
+                screen_height() * 0.5,
+                get_responsive_text_size(40.0),
+                DARKGRAY,
+            );
+            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
+                game_started = true;
+            }
+            next_frame().await;
+            continue;
+        }
         if game_over {
             clear_background(RED);
             draw_text(
