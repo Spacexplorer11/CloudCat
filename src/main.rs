@@ -68,6 +68,8 @@ async fn main() {
     let highscore = HighscoreManager::load();
 
     loop {
+        let score_u32 = score as u32;
+
         if !game_started {
             clear_background(WHITE);
             draw_text(
@@ -106,6 +108,13 @@ async fn main() {
                 get_responsive_text_size(100.0),
                 DARKGRAY,
             );
+            draw_text(
+                &format!("Your score was {}", score_u32),
+                screen_width() * 0.25,
+                screen_height() * 0.6,
+                get_responsive_text_size(50.0),
+                DARKGRAY,
+            );
 
             #[cfg(target_arch = "wasm32")]
             let restart_message = "Please refresh the page to play again";
@@ -126,8 +135,6 @@ async fn main() {
         let dt = get_frame_time();
 
         clear_background(WHITE);
-
-        let score_u32 = score as u32;
 
         draw_text(
             &format!("Score: {}", score_u32),
