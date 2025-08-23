@@ -5,18 +5,10 @@ use macroquad::prelude::*;
 use std::fs;
 
 #[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
-#[cfg(target_arch = "wasm32")]
-use web_sys::*;
-
-#[cfg(target_arch = "wasm32")]
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = localStorage)]
-    fn getItem(key: &str) -> Option<String>;
-
-    #[wasm_bindgen(js_namespace = localStorage)]
-    fn setItem(key: &str, value: &str);
+unsafe extern "C" {
+    fn js_get_item(key_ptr: *const u8, key_len: usize) -> i32;
+    fn js_set_item(key_ptr: *const u8, key_len: usize, value_ptr: *const u8, value_len: usize);
+    fn js_get_value(key_ptr: *const u8, key_len: usize, buffer_ptr: *mut u8, buffer_len: usize) -> usize;
 }
 
 fn get_responsive_text_size(base_size: f32) -> f32 {
@@ -291,9 +283,31 @@ fn load_highscore() -> i32 {
     }
     #[cfg(target_arch = "wasm32")]
     {
-        match getItem("cloudcat_highscore") {
-            Some(s) => s.parse::<i32>().unwrap_or(0),
-            None => 0,
+        unsafe {
+            let key = "cloudcat_highscore";
+            let key_ptr = key.as_ptr();
+            let key_len = key.len();
+            
+            // Check if the item exists
+            let exists = js_get_item(key_ptr, key_len);
+            if exists == 0 {
+                return 0; // No value found
+            }
+            
+            // Create a buffer to receive the value
+            let mut buffer = [0u8; 32]; // Should be enough for an i32 string
+            let actual_len = js_get_value(key_ptr, key_len, buffer.as_mut_ptr(), buffer.len());
+            
+            if actual_len == 0 {
+                return 0;
+            }
+            
+            // Convert to string and parse
+            if let Ok(value_str) = std::str::from_utf8(&buffer[..actual_len.min(buffer.len())]) {
+                value_str.trim().parse::<i32>().unwrap_or(0)
+            } else {
+                0
+            }
         }
     }
 }
@@ -305,6 +319,16 @@ fn save_highscore(score: i32) {
     }
     #[cfg(target_arch = "wasm32")]
     {
-        setItem("cloudcat_highscore", &score.to_string());
+        unsafe {
+            let key = "cloudcat_highscore";
+            let value = score.to_string();
+            
+            js_set_item(
+                key.as_ptr(),
+                key.len(),
+                value.as_ptr(),
+                value.len()
+            );
+        }
     }
 }

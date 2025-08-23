@@ -1465,7 +1465,43 @@ var importObject = {
             }
             animation_frame_timeout = window.requestAnimationFrame(animation);
         },
-        init_webgl
+        init_webgl,
+        
+        // Custom localStorage functions for CloudCat
+        js_get_item: function(key_ptr, key_len) {
+            try {
+                const key = UTF8ToString(key_ptr, key_len);
+                const value = localStorage.getItem(key);
+                console.log("js_get_item called with key:", key, "got value:", value);
+                return value ? 1 : 0; // Return 1 if value exists, 0 if not
+            } catch (e) {
+                console.error("localStorage.getItem error:", e);
+                return 0;
+            }
+        },
+        js_set_item: function(key_ptr, key_len, value_ptr, value_len) {
+            try {
+                const key = UTF8ToString(key_ptr, key_len);
+                const value = UTF8ToString(value_ptr, value_len);
+                console.log("js_set_item called with key:", key, "value:", value);
+                localStorage.setItem(key, value);
+            } catch (e) {
+                console.error("localStorage.setItem error:", e);
+            }
+        },
+        js_get_value: function(key_ptr, key_len, buffer_ptr, buffer_len) {
+            try {
+                const key = UTF8ToString(key_ptr, key_len);
+                const value = localStorage.getItem(key);
+                if (!value) return 0;
+                
+                stringToUTF8(value, wasm_memory.buffer, buffer_ptr, buffer_len);
+                return value.length;
+            } catch (e) {
+                console.error("js_get_value error:", e);
+                return 0;
+            }
+        }
     },
     __wbindgen_placeholder__: {},
     __wbindgen_placeholder: {},
