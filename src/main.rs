@@ -56,7 +56,7 @@ async fn main() {
 
     // Score & Highscore RAWH
     let mut score = 0.0;
-    let highscore = load_highscore();
+    let highscore = load_highscore().await;
 
     loop {
         if game_over {
@@ -274,7 +274,7 @@ async fn draw_umbrella(umbrella: &Texture2D) {
     );
 }
 
-fn load_highscore() -> i32 {
+async fn load_highscore() -> i32 {
     #[cfg(not(target_arch = "wasm32"))]
     {
         match fs::read_to_string("score.txt") {
@@ -284,8 +284,6 @@ fn load_highscore() -> i32 {
     }
     #[cfg(target_arch = "wasm32")]
     {
-        // For web platform, we maintain highscore in memory during the session
-        // to avoid unsafe code while still providing a meaningful highscore display
         SESSION_HIGHSCORE.load(Ordering::Relaxed)
     }
 }
