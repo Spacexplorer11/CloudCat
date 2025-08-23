@@ -26,21 +26,28 @@ var clipboard = null;
 var cloudcat_loaded_highscore = 0;
 var cloudcat_highscore_loaded = false;
 
-// Set a demo highscore for testing - improved version
+// Set a demo highscore for testing - improved version with better initialization
 document.addEventListener('DOMContentLoaded', function() {
+    // Always log current localStorage contents for debugging
+    console.log("=== CloudCat localStorage Debug Info ===");
+    console.log("Current localStorage cloudcat_highscore:", localStorage.getItem('cloudcat_highscore'));
+    
     // Check if there's already a highscore in localStorage
     var existingScore = localStorage.getItem('cloudcat_highscore');
     if (existingScore === null) {
         // Set a demo value for testing
-        console.log("No existing highscore found, setting demo value for testing");
-        localStorage.setItem('cloudcat_highscore', '78');
-        console.log("Demo highscore set to 78");
+        var demoScore = 127; // A nice demo score that's clearly visible
+        console.log("No existing highscore found, setting demo value for testing:", demoScore);
+        localStorage.setItem('cloudcat_highscore', demoScore.toString());
+        console.log("Demo highscore set to", demoScore);
     } else {
         console.log("Existing highscore found in localStorage:", existingScore);
     }
     
-    // Also log current localStorage contents for debugging
-    console.log("Current localStorage cloudcat_highscore:", localStorage.getItem('cloudcat_highscore'));
+    // Verify and log final state
+    var finalScore = localStorage.getItem('cloudcat_highscore');
+    console.log("Final localStorage cloudcat_highscore:", finalScore);
+    console.log("=== End CloudCat localStorage Debug Info ===");
 });
 
 var plugins = [];
@@ -704,7 +711,7 @@ var importObject = {
             var message = UTF8ToString(ptr);
             console.info(message);
             
-            // Handle special CloudCat storage messages - Updated 2030
+            // Handle special CloudCat storage messages - Updated 2031 - Two-way communication
             if (message.startsWith("CLOUDCAT_STORAGE_LOAD:")) {
                 var key = message.substring("CLOUDCAT_STORAGE_LOAD:".length);
                 console.log("Processing storage load for key:", key);
@@ -715,19 +722,59 @@ var importObject = {
                         var score = parseInt(value, 10);
                         if (!isNaN(score) && score > 0) {
                             console.log("CLOUDCAT_STORAGE_LOADED:" + key + ":" + score);
-                            // Send a special response message that Rust can detect
-                            console.info("HIGHSCORE_UPDATE:" + score);
+                            // Send the loaded value back to Rust by using a pattern it can detect
+                            // We'll send multiple messages that Rust can potentially intercept
+                            for (var i = 0; i < 3; i++) {
+                                console.info("RUST_HIGHSCORE_VALUE:" + score);
+                            }
                         } else {
                             console.log("Invalid or zero score in localStorage, using 0");
-                            console.info("HIGHSCORE_UPDATE:0");
+                            for (var i = 0; i < 3; i++) {
+                                console.info("RUST_HIGHSCORE_VALUE:0");
+                            }
                         }
                     } else {
                         console.log("No previous highscore found in localStorage");
-                        console.info("HIGHSCORE_UPDATE:0");
+                        for (var i = 0; i < 3; i++) {
+                            console.info("RUST_HIGHSCORE_VALUE:0");
+                        }
                     }
                 } catch (e) {
                     console.error("Error loading from localStorage:", e);
-                    console.info("HIGHSCORE_UPDATE:0");
+                    for (var i = 0; i < 3; i++) {
+                        console.info("RUST_HIGHSCORE_VALUE:0");
+                    }
+                }
+            } else if (message.startsWith("CLOUDCAT_GET_STORED_HIGHSCORE")) {
+                // This is a query from Rust asking for the current localStorage value
+                console.log("Rust is requesting stored highscore...");
+                try {
+                    var storedValue = localStorage.getItem('cloudcat_highscore');
+                    if (storedValue !== null) {
+                        var storedScore = parseInt(storedValue, 10);
+                        if (!isNaN(storedScore)) {
+                            console.log("Responding with stored highscore:", storedScore);
+                            // Send the response multiple times to ensure Rust can see it
+                            for (var i = 0; i < 5; i++) {
+                                console.info("STORED_HIGHSCORE_RESPONSE:" + storedScore);
+                            }
+                        } else {
+                            console.log("Invalid stored score, responding with 0");
+                            for (var i = 0; i < 5; i++) {
+                                console.info("STORED_HIGHSCORE_RESPONSE:0");
+                            }
+                        }
+                    } else {
+                        console.log("No stored score found, responding with 0");
+                        for (var i = 0; i < 5; i++) {
+                            console.info("STORED_HIGHSCORE_RESPONSE:0");
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error querying stored highscore:", e);
+                    for (var i = 0; i < 5; i++) {
+                        console.info("STORED_HIGHSCORE_RESPONSE:0");
+                    }
                 }
             } else if (message.startsWith("HIGHSCORE_UPDATE:")) {
                 // This is a response from the load operation - log it for visibility
