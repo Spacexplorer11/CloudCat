@@ -15,9 +15,15 @@ It's made using Macroquad, a game library for Rust, and is heavily inspired by t
 
 ## How do I play?
 
-You can download the [latest release](https://github.com/Spacexplorer11/CloudCat/releases/latest) for your OS or [play it in your browser](https://spacexplorer11.github.io/CloudCat/)!
+You can download the [latest release](https://github.com/Spacexplorer11/CloudCat/releases/latest) for your OS or [play it in your browser](https://cloudcat.akaalroop.com)!
 Press `Space` or click/tap the screen to activate the umbrella, and that's all you need to do!  
 Your highscore is automatically saved/loaded.  
 >[!CAUTION]
 > Your highscore is only saved when your game is over and you've reached the game over screen
 > **NOT** when quitting at any point.
+
+## AI transparency
+- Minimal (5-10%) AI was used in the actual gameplay and screens.
+- **NO (0%)** AI was used in the game assets (cat, cloud, umbrella), I'm very proud of myself to have hand-drawn and hand-animated them! :)
+- **Very Heavy (90%)** AI was used to allow me to deploy this game to the web since idk a thing abt that or WebGL.
+Overall, I'm proud to say that in the actual gameplay, concept and art, very little AI was used!
