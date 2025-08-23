@@ -26,30 +26,6 @@ var clipboard = null;
 var cloudcat_loaded_highscore = 0;
 var cloudcat_highscore_loaded = false;
 
-// Set a demo highscore for testing - improved version with better initialization
-document.addEventListener('DOMContentLoaded', function() {
-    // Always log current localStorage contents for debugging
-    console.log("=== CloudCat localStorage Debug Info ===");
-    console.log("Current localStorage cloudcat_highscore:", localStorage.getItem('cloudcat_highscore'));
-    
-    // Check if there's already a highscore in localStorage
-    var existingScore = localStorage.getItem('cloudcat_highscore');
-    if (existingScore === null) {
-        // Set a demo value for testing
-        var demoScore = 127; // A nice demo score that's clearly visible
-        console.log("No existing highscore found, setting demo value for testing:", demoScore);
-        localStorage.setItem('cloudcat_highscore', demoScore.toString());
-        console.log("Demo highscore set to", demoScore);
-    } else {
-        console.log("Existing highscore found in localStorage:", existingScore);
-    }
-    
-    // Verify and log final state
-    var finalScore = localStorage.getItem('cloudcat_highscore');
-    console.log("Final localStorage cloudcat_highscore:", finalScore);
-    console.log("=== End CloudCat localStorage Debug Info ===");
-});
-
 var plugins = [];
 var wasm_memory;
 var animation_frame_timeout;

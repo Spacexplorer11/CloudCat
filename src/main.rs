@@ -15,8 +15,7 @@ static HIGHSCORE: AtomicI32 = AtomicI32::new(0);
 #[cfg(target_arch = "wasm32")]
 static HIGHSCORE_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
-#[cfg(target_arch = "wasm32")]
-static HIGHSCORE_DEMO_APPLIED: AtomicBool = AtomicBool::new(false);
+
 
 
 
@@ -65,7 +64,6 @@ async fn main() {
     // Score & Highscore RAWH
     let mut score = 0.0;
     let _initial_highscore = load_highscore().await; // Initialize the system
-    let start_time = get_time();
 
     loop {
         if game_over {
@@ -100,19 +98,6 @@ async fn main() {
 
         let score_i32 = score as i32;
         let highscore = get_current_highscore();
-        
-        // Demo feature: After 3 seconds of gameplay, apply localStorage value to show it works
-        #[cfg(target_arch = "wasm32")]
-        {
-            if !HIGHSCORE_DEMO_APPLIED.load(Ordering::Relaxed) && (get_time() - start_time > 3.0) {
-                // Simulate applying a loaded localStorage value for demonstration
-                // In a real implementation, this would come from JavaScript
-                macroquad::logging::info!("Demo: Simulating localStorage value application");
-                HIGHSCORE.store(127, Ordering::Relaxed); // This matches our demo value in JS
-                HIGHSCORE_DEMO_APPLIED.store(true, Ordering::Relaxed);
-                macroquad::logging::info!("Demo highscore applied: 127");
-            }
-        }
 
         draw_text(
             &format!("Score: {}", score_i32),
