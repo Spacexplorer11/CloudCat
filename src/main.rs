@@ -49,7 +49,7 @@ async fn main() {
     // Cloud variables ☁
     let mut cloud_frame = 0;
     let mut cloud_timer = 0.0;
-    let mut cloud_x = 350.0;
+    let mut cloud_x = screen_width();
 
     // Floor variable, just one :(
     let mut floor_x = 0.0;
