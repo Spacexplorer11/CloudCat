@@ -42,6 +42,7 @@ jobs:
         cp target/wasm32-unknown-unknown/release/cloudcat.wasm web/
         cp index.html gl.js quad-storage.js sapp_jsutils.js web/
         cp -r assets web/
+        cp -r favicons web/
         
     - name: Setup Pages
       uses: actions/configure-pages@v5
