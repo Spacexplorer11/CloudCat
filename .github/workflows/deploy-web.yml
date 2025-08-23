@@ -40,7 +40,7 @@ jobs:
       run: |
         mkdir -p web
         cp target/wasm32-unknown-unknown/release/cloudcat.wasm web/
-        cp index.html gl.js web/
+        cp index.html gl.js quad-storage.js sapp_jsutils.js web/
         cp -r assets web/
         
     - name: Setup Pages
