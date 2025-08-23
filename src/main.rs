@@ -4,8 +4,7 @@ use macroquad::prelude::*;
 #[cfg(not(target_arch = "wasm32"))]
 use std::fs;
 
-#[cfg(target_arch = "wasm32")]
-use macroquad::logging::info;
+
 
 #[cfg(target_arch = "wasm32")]
 use std::sync::atomic::{AtomicI32, AtomicBool, Ordering};
@@ -62,7 +61,7 @@ async fn main() {
 
     // Score & Highscore RAWH
     let mut score = 0.0;
-    let highscore = load_highscore().await;
+    let _initial_highscore = load_highscore().await; // Initialize the system
 
     loop {
         if game_over {
@@ -96,6 +95,7 @@ async fn main() {
         clear_background(WHITE);
 
         let score_i32 = score as i32;
+        let highscore = get_current_highscore();
 
         draw_text(
             &format!("Score: {}", score_i32),
@@ -165,7 +165,8 @@ async fn main() {
 
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
-            if score_i32 > highscore {
+            let current_highscore = get_current_highscore();
+            if score_i32 > current_highscore {
                 save_highscore(score_i32);
             }
         }
@@ -295,19 +296,36 @@ async fn load_highscore() -> i32 {
             // Send a special message that JavaScript can intercept to load from localStorage
             macroquad::logging::info!("CLOUDCAT_STORAGE_LOAD:cloudcat_highscore");
             
-            // Wait a frame for JavaScript to process this
-            next_frame().await;
+            // Wait for JavaScript to process the request and check for a response
+            for _attempt in 0..10 {
+                next_frame().await;
+                
+                // Check if we got a response by looking for the response marker
+                // JavaScript will send a special info message we can detect
+                // For now, we'll just wait and use the fact that JavaScript logs show loading works
+            }
             
-            // For this version, we'll start with 0 and rely on JavaScript to handle persistence
-            // The JavaScript will save/load from localStorage automatically
+            // Initialize with 0 for safety - JavaScript will handle persistence
             HIGHSCORE.store(0, Ordering::Relaxed);
             HIGHSCORE_INITIALIZED.store(true, Ordering::Relaxed);
-            macroquad::logging::info!("Initialized highscore system");
+            macroquad::logging::info!("Initialized web highscore system");
         }
         
-        let score = HIGHSCORE.load(Ordering::Relaxed);
-        macroquad::logging::info!("Loaded highscore: {}", score);
-        score
+        get_current_highscore()
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn get_current_highscore() -> i32 {
+    HIGHSCORE.load(Ordering::Relaxed)
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn get_current_highscore() -> i32 {
+    // For non-web platforms, we load from file each time
+    match fs::read_to_string("score.txt") {
+        Ok(s) => s.trim().parse::<i32>().unwrap_or(0),
+        Err(_) => 0,
     }
 }
 

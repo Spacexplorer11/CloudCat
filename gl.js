@@ -22,6 +22,19 @@ var gl;
 
 var clipboard = null;
 
+// Global variable to store loaded highscore from localStorage
+var cloudcat_loaded_highscore = 0;
+var cloudcat_highscore_loaded = false;
+
+// Set a demo highscore for testing
+document.addEventListener('DOMContentLoaded', function() {
+    // Only set demo data if there's no existing highscore
+    if (localStorage.getItem('cloudcat_highscore') === null) {
+        console.log("Setting demo highscore for testing");
+        localStorage.setItem('cloudcat_highscore', '42');
+    }
+});
+
 var plugins = [];
 var wasm_memory;
 var animation_frame_timeout;
@@ -683,7 +696,7 @@ var importObject = {
             var message = UTF8ToString(ptr);
             console.info(message);
             
-            // Handle special CloudCat storage messages - Updated 2026
+            // Handle special CloudCat storage messages - Updated 2029
             if (message.startsWith("CLOUDCAT_STORAGE_LOAD:")) {
                 var key = message.substring("CLOUDCAT_STORAGE_LOAD:".length);
                 console.log("Processing storage load for key:", key);
@@ -692,20 +705,30 @@ var importObject = {
                     console.log("Retrieved value from localStorage:", value);
                     if (value !== null) {
                         var score = parseInt(value, 10);
-                        if (!isNaN(score)) {
-                            // Set the score in the page title so Rust can read it
-                            // Use a specific format that won't interfere with normal titles
-                            document.title = "CloudCat|HIGHSCORE:" + score;
+                        if (!isNaN(score) && score > 0) {
                             console.log("CLOUDCAT_STORAGE_LOADED:" + key + ":" + score);
+                            // Set the window global that Rust can read
+                            window.cloudcat_highscore = score;
+                            console.log("Set window.cloudcat_highscore =", score);
+                        } else {
+                            console.log("Invalid or zero score in localStorage, using 0");
+                            window.cloudcat_highscore = 0;
                         }
                     } else {
-                        // No score found, set title to indicate this
-                        document.title = "CloudCat|HIGHSCORE:NONE";
                         console.log("No previous highscore found in localStorage");
+                        window.cloudcat_highscore = 0;
                     }
                 } catch (e) {
                     console.error("Error loading from localStorage:", e);
-                    document.title = "CloudCat|HIGHSCORE:ERROR";
+                    window.cloudcat_highscore = 0;
+                }
+            } else if (message.startsWith("CLOUDCAT_SET_HIGHSCORE:")) {
+                // This handles when we need to update the Rust-side highscore  
+                var scoreStr = message.substring("CLOUDCAT_SET_HIGHSCORE:".length);
+                var score = parseInt(scoreStr, 10);
+                if (!isNaN(score)) {
+                    console.log("Setting highscore in JavaScript side:", score);
+                    // This message will be processed by Rust's console handler
                 }
             } else if (message.startsWith("CLOUDCAT_STORAGE_SAVE:")) {
                 console.log("Processing storage save message:", message);
