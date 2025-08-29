@@ -143,6 +143,7 @@ async fn main() {
 
         clear_background(WHITE);
 
+        #[cfg(not(target_arch = "wasm32"))]
         draw_text(
             &format!("Score: {}", score_u32),
             screen_width() * 0.7,
@@ -151,6 +152,16 @@ async fn main() {
             DARKGRAY,
         );
 
+        #[cfg(target_arch = "wasm32")]
+        draw_text(
+            &format!("Score: {}", score_u32),
+            screen_width() * 0.7,
+            110.0,
+            get_responsive_size(50.0),
+            DARKGRAY,
+        );
+
+        #[cfg(not(target_arch = "wasm32"))]
         if score_u32 < highscore {
             draw_text(
                 &format!("Your highscore is {}", highscore),
@@ -165,6 +176,25 @@ async fn main() {
                 0.0,
                 50.0,
                 get_responsive_size(40.0),
+                DARKGRAY,
+            );
+        }
+
+        #[cfg(target_arch = "wasm32")]
+        if score_u32 < highscore {
+            draw_text(
+                &format!("Your highscore is {}", highscore),
+                screen_width() * 0.01,
+                110.0,
+                crate::get_responsive_size(50.0),
+                DARKGRAY,
+            );
+        } else {
+            draw_text(
+                &format!("Your previous highscore was {}", highscore),
+                0.0,
+                110.0,
+                crate::get_responsive_size(40.0),
                 DARKGRAY,
             );
         }
