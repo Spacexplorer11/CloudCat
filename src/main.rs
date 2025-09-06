@@ -65,7 +65,7 @@ async fn main() {
 
     // Score & Highscore RAWH
     let mut score = 0.0;
-    let highscore = HighscoreManager::load();
+    let mut highscore = HighscoreManager::load();
 
     loop {
         let score_u32 = score as u32;
@@ -124,9 +124,9 @@ async fn main() {
             );
 
             #[cfg(target_arch = "wasm32")]
-            let restart_message = "Please refresh the page to play again";
+            let restart_message = "Please tap/click/hit space or refresh to play again";
             #[cfg(not(target_arch = "wasm32"))]
-            let restart_message = "Please restart the game to play again";
+            let restart_message = "Please tap/click/hit space or restart the game to play again";
 
             draw_text(
                 restart_message,
@@ -135,6 +135,31 @@ async fn main() {
                 get_responsive_size(30.0),
                 DARKGRAY,
             );
+
+            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
+                // Catty
+                cat_frame = 0;
+                cat_timer = 0.0;
+                cat_run_speed = 0.05;
+
+                // Cloudy
+                cloud_x = screen_width();
+                cloud_frame = 0;
+                cloud_timer = 0.0;
+
+                // Floorrrrrrr
+                floor_x = 0.0;
+
+                // Umbrellaaaaaaaa
+                umbrella_start_time = 0.0;
+
+                // Let's go back to the start!
+                game_over = false;
+                game_started = false;
+                highscore = HighscoreManager::load();
+                score = 0.0;
+                continue;
+            }
             next_frame().await;
             continue;
         }
