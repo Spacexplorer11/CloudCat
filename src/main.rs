@@ -25,79 +25,6 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
     draw_text(text, x, y, font_size, colour);
 }
 
-struct Settings;
-
-impl Settings {
-    fn is_settings_clicked() -> bool {
-        let (mx, my) = mouse_position();
-        let (settings_x, settings_y) = (
-            screen_width() - get_responsive_size(32.0) * 2.5,
-            screen_height() - get_responsive_size(32.0) * 2.5,
-        );
-        if mx >= settings_x
-            && mx <= settings_x + get_responsive_size(32.0) * 2.5
-            && my >= settings_y
-            && my <= settings_y + get_responsive_size(32.0) * 2.5
-        {
-            return true;
-        }
-        false
-    }
-
-    fn is_settings_exit_clicked() -> bool {
-        let menu_size = get_responsive_size(32.0) * 15.0;
-        let menu_x = screen_width() * 0.5 - menu_size * 0.5;
-        let menu_y = screen_height() * 0.5 - menu_size * 0.5;
-
-        let button_size = menu_size / 5.0;
-
-        let close_x = menu_x + menu_size - button_size;
-        let close_y = menu_y;
-
-        let (mx, my) = mouse_position();
-
-        if mx >= close_x
-            && mx <= close_x + button_size
-            && my >= close_y
-            && my <= close_y + button_size
-        {
-            return true;
-        }
-        false
-    }
-
-    async fn settings_menu(settings_menu: &Texture2D) {
-        loop {
-            clear_background(WHITE);
-            draw_texture_ex(
-                settings_menu,
-                screen_width() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5,
-                screen_height() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5,
-                WHITE,
-                DrawTextureParams {
-                    dest_size: Some(vec2(
-                        get_responsive_size(32.0) * 15.0,
-                        get_responsive_size(32.0) * 15.0,
-                    )),
-                    source: Some(Rect {
-                        x: 0.0,
-                        y: 0.0,
-                        w: 32.0,
-                        h: 32.0,
-                    }),
-                    ..Default::default()
-                },
-            );
-            if is_mouse_button_pressed(MouseButton::Left) {
-                if Self::is_settings_exit_clicked() {
-                    break;
-                }
-            }
-            next_frame().await;
-        }
-    }
-}
-
 #[macroquad::main("CloudCat")]
 async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
@@ -201,8 +128,8 @@ async fn main() {
                 },
             );
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                if Settings::is_settings_clicked() {
-                    Settings::settings_menu(&settings_menu).await;
+                if settings::Settings::is_settings_clicked() {
+                    settings::Settings::settings_menu(&settings_menu).await;
                 } else {
                     game_started = true;
                 }
@@ -255,8 +182,8 @@ async fn main() {
             );
 
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                if Settings::is_settings_clicked() {
-                    Settings::settings_menu(&settings_menu).await;
+                if settings::Settings::is_settings_clicked() {
+                    settings::Settings::settings_menu(&settings_menu).await;
                 } else {
                     // Catty
                     cat_frame = 0;
