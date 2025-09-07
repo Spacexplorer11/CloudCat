@@ -5,7 +5,7 @@ use quad_storage::STORAGE;
 
 fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
-    let scale_factor = (min_dimension / 800.0).max(0.2).min(2.5);
+    let scale_factor = min_dimension * 0.0013;
     base_size * scale_factor
 }
 
@@ -91,28 +91,28 @@ async fn main() {
             clear_background(WHITE);
             draw_centred_text(
                 "Please click/touch/hit space to put up the umbrella to protect your cat.",
-                30.0,
+                27.0,
                 screen_height() * 0.3,
                 DARKGRAY,
                 false,
             );
             draw_centred_text(
                 "The umbrella lasts 3 SECONDS",
-                40.0,
+                38.0,
                 screen_height() * 0.4,
                 RED,
                 false,
             );
             draw_centred_text(
                 "The aim of the game is not let your cat get touched by rain",
-                40.0,
+                34.0,
                 screen_height() * 0.5,
                 DARKGRAY,
                 false,
             );
             draw_centred_text(
                 "Click any key, tap or click anywhere to start the game",
-                40.0,
+                34.0,
                 screen_height() * 0.6,
                 DARKGRAY,
                 false,
