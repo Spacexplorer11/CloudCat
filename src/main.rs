@@ -41,6 +41,79 @@ impl HighscoreManager {
     }
 }
 
+struct Settings;
+
+impl Settings {
+    fn is_settings_clicked() -> bool {
+        let (mx, my) = mouse_position();
+        let (settings_x, settings_y) = (
+            screen_width() - get_responsive_size(32.0) * 2.5,
+            screen_height() - get_responsive_size(32.0) * 2.5,
+        );
+        if mx >= settings_x
+            && mx <= settings_x + get_responsive_size(32.0) * 2.5
+            && my >= settings_y
+            && my <= settings_y + get_responsive_size(32.0) * 2.5
+        {
+            return true;
+        }
+        false
+    }
+
+    fn is_settings_exit_clicked() -> bool {
+        let menu_size = get_responsive_size(32.0) * 15.0;
+        let menu_x = screen_width() * 0.5 - menu_size * 0.5;
+        let menu_y = screen_height() * 0.5 - menu_size * 0.5;
+
+        let button_size = menu_size / 5.0;
+
+        let close_x = menu_x + menu_size - button_size;
+        let close_y = menu_y;
+
+        let (mx, my) = mouse_position();
+
+        if mx >= close_x
+            && mx <= close_x + button_size
+            && my >= close_y
+            && my <= close_y + button_size
+        {
+            return true;
+        }
+        false
+    }
+
+    async fn settings_menu(settings_menu: &Texture2D) {
+        loop {
+            clear_background(WHITE);
+            draw_texture_ex(
+                settings_menu,
+                screen_width() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5,
+                screen_height() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 15.0,
+                        get_responsive_size(32.0) * 15.0,
+                    )),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
+            if is_mouse_button_pressed(MouseButton::Left) {
+                if Self::is_settings_exit_clicked() {
+                    break;
+                }
+            }
+            next_frame().await;
+        }
+    }
+}
+
 #[macroquad::main("CloudCat")]
 async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
@@ -57,6 +130,12 @@ async fn main() {
 
     let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
     umbrella.set_filter(FilterMode::Nearest);
+
+    let settings: Texture2D = load_texture("assets/settings.png").await.unwrap();
+    settings.set_filter(FilterMode::Linear);
+
+    let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
+    settings_menu.set_filter(FilterMode::Nearest);
 
     // Catty variables :3
     let mut cat_frame = 0;
@@ -117,8 +196,32 @@ async fn main() {
                 DARKGRAY,
                 false,
             );
+
+            draw_texture_ex(
+                &settings,
+                screen_width() - get_responsive_size(32.0) * 2.5,
+                screen_height() - get_responsive_size(32.0) * 2.5,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 2.5,
+                        get_responsive_size(32.0) * 2.5,
+                    )),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                game_started = true;
+                if Settings::is_settings_clicked() {
+                    Settings::settings_menu(&settings_menu).await;
+                } else {
+                    game_started = true;
+                }
             }
             next_frame().await;
             continue;
@@ -147,29 +250,53 @@ async fn main() {
                 false,
             );
 
+            draw_texture_ex(
+                &settings,
+                screen_width() - get_responsive_size(32.0) * 2.5,
+                screen_height() - get_responsive_size(32.0) * 2.5,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 2.5,
+                        get_responsive_size(32.0) * 2.5,
+                    )),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
+
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                // Catty
-                cat_frame = 0;
-                cat_timer = 0.0;
-                cat_run_speed = 0.05;
+                if Settings::is_settings_clicked() {
+                    Settings::settings_menu(&settings_menu).await;
+                } else {
+                    // Catty
+                    cat_frame = 0;
+                    cat_timer = 0.0;
+                    cat_run_speed = 0.05;
 
-                // Cloudy
-                cloud_x = screen_width();
-                cloud_frame = 0;
-                cloud_timer = 0.0;
+                    // Cloudy
+                    cloud_x = screen_width();
+                    cloud_frame = 0;
+                    cloud_timer = 0.0;
 
-                // Floorrrrrrr
-                floor_x = 0.0;
+                    // Floorrrrrrr
+                    floor_x = 0.0;
 
-                // Umbrellaaaaaaaa
-                umbrella_start_time = 0.0;
+                    // Umbrellaaaaaaaa
+                    umbrella_start_time = 0.0;
 
-                // Let's go back to the start!
-                game_over = false;
-                game_started = false;
-                highscore = HighscoreManager::load();
-                score = 0.0;
-                continue;
+                    // Let's go back to the start!
+                    game_over = false;
+                    game_started = false;
+                    highscore = HighscoreManager::load();
+                    score = 0.0;
+                    continue;
+                }
             }
             next_frame().await;
             continue;
