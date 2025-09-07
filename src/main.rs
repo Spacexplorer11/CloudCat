@@ -56,8 +56,13 @@ async fn main() {
         cloud_timer: 0.0,
     };
 
-    let floor_tex: Texture2D = load_texture("assets/floor.png").await.unwrap();
-    floor_tex.set_filter(FilterMode::Nearest);
+    let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
+    floor_texture.set_filter(FilterMode::Nearest);
+
+    let mut floor = entities::floor::Floor {
+        texture: floor_texture,
+        floor_x: 0.0,
+    };
 
     let umbrella_texture: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
     umbrella_texture.set_filter(FilterMode::Nearest);
@@ -72,9 +77,6 @@ async fn main() {
 
     let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
-
-    // Floor variable, just one :(
-    let mut floor_x = 0.0;
 
     // Game OVER RAWHHH >:)
     let mut game_over = false;
@@ -208,7 +210,7 @@ async fn main() {
                     cloud.cloud_timer = 0.0;
 
                     // Floorrrrrrr
-                    floor_x = 0.0;
+                    floor.floor_x = 0.0;
 
                     // Umbrellaaaaaaaa
                     umbrella.umbrella_start_time = 0.0;
@@ -333,11 +335,11 @@ async fn main() {
         )
         .await;
 
-        draw_floor(&floor_tex, floor_x).await;
+        entities::floor::Floor::draw_floor(&floor.texture, floor.floor_x).await;
 
-        floor_x -= scroll_speed * dt;
-        if floor_x <= -screen_width() {
-            floor_x = 0.0;
+        floor.floor_x -= scroll_speed * dt;
+        if floor.floor_x <= -screen_width() {
+            floor.floor_x = 0.0;
         }
 
         if (cloud.cloud_x <= 150.0 && cloud.cloud_x > 0.0) && !umbrella_up {
@@ -350,24 +352,5 @@ async fn main() {
         score += 60.0 * dt;
 
         next_frame().await;
-    }
-}
-
-async fn draw_floor(floor: &Texture2D, floor_x: f32) {
-    let floor_width = screen_width();
-    let floor_height = 24.0;
-
-    for offset in [0.0, floor_width].iter() {
-        draw_texture_ex(
-            &floor,
-            floor_x + *offset,
-            screen_height() - 45.0,
-            WHITE,
-            DrawTextureParams {
-                dest_size: Some(vec2(floor_width, floor_height)),
-                source: None,
-                ..Default::default()
-            },
-        );
     }
 }
