@@ -1,7 +1,10 @@
+mod highscore;
+mod settings;
+mod ui;
+
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
-use quad_storage::STORAGE;
 
 fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
@@ -20,25 +23,6 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
         return;
     }
     draw_text(text, x, y, font_size, colour);
-}
-
-struct HighscoreManager;
-
-impl HighscoreManager {
-    fn load() -> u32 {
-        let storage = STORAGE.lock().unwrap();
-        let zero: String = "0".parse().unwrap();
-        storage
-            .get("cloudcat_highscore")
-            .unwrap_or(zero)
-            .parse::<u32>()
-            .unwrap_or(0)
-    }
-
-    fn save(score: u32) {
-        let mut storage = STORAGE.lock().unwrap();
-        storage.set("cloudcat_highscore", &*score.to_string());
-    }
 }
 
 struct Settings;
@@ -161,7 +145,7 @@ async fn main() {
 
     // Score & Highscore RAWH
     let mut score = 0.0;
-    let mut highscore = HighscoreManager::load();
+    let mut highscore = highscore::HighscoreManager::load();
 
     loop {
         let score_u32 = score as u32;
@@ -293,7 +277,7 @@ async fn main() {
                     // Let's go back to the start!
                     game_over = false;
                     game_started = false;
-                    highscore = HighscoreManager::load();
+                    highscore = highscore::HighscoreManager::load();
                     score = 0.0;
                     continue;
                 }
@@ -405,7 +389,7 @@ async fn main() {
         if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
             game_over = true;
             if score_u32 > highscore {
-                HighscoreManager::save(score_u32);
+                highscore::HighscoreManager::save(score_u32);
             }
         }
 
