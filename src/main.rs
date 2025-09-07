@@ -36,15 +36,25 @@ async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     let mut rng = rng();
 
+    let cat_texture = load_texture("assets/cat.png").await.unwrap();
+    cat_texture.set_filter(FilterMode::Nearest);
+
     let mut cat = entities::cat::Cat {
-        texture: load_texture("assets/cat.png").await.unwrap(),
+        texture: cat_texture,
         cat_frame: 0,
         cat_timer: 0.0,
         cat_run_speed: 0.05,
     };
 
-    let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
-    cloud.set_filter(FilterMode::Nearest);
+    let cloud_texture: Texture2D = load_texture("assets/cloud.png").await.unwrap();
+    cloud_texture.set_filter(FilterMode::Nearest);
+
+    let mut cloud = entities::cloud::Cloud {
+        texture: cloud_texture,
+        cloud_x: screen_width(),
+        cloud_frame: 0,
+        cloud_timer: 0.0,
+    };
 
     let floor_tex: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_tex.set_filter(FilterMode::Nearest);
@@ -57,11 +67,6 @@ async fn main() {
 
     let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
-
-    // Cloud variables ☁
-    let mut cloud_frame = 0;
-    let mut cloud_timer = 0.0;
-    let mut cloud_x = screen_width();
 
     // Floor variable, just one :(
     let mut floor_x = 0.0;
@@ -191,17 +196,14 @@ async fn main() {
                     settings::Settings::settings_menu(&settings_menu).await;
                 } else {
                     // Catty
-                    cat = entities::cat::Cat {
-                        texture: load_texture("assets/cat.png").await.unwrap(),
-                        cat_frame: 0,
-                        cat_timer: 0.0,
-                        cat_run_speed: 0.05,
-                    };
+                    cat.cat_frame = 0;
+                    cat.cat_timer = 0.0;
+                    cat.cat_run_speed = 0.05;
 
                     // Cloudy
-                    cloud_x = screen_width();
-                    cloud_frame = 0;
-                    cloud_timer = 0.0;
+                    cloud.cloud_x = screen_width();
+                    cloud.cloud_frame = 0;
+                    cloud.cloud_timer = 0.0;
 
                     // Floorrrrrrr
                     floor_x = 0.0;
@@ -293,19 +295,25 @@ async fn main() {
 
         let scroll_speed = 7.5 / cat.cat_run_speed;
 
-        cloud_x -= scroll_speed * dt;
-        if cloud_x < -192.0 {
+        cloud.cloud_x -= scroll_speed * dt;
+        if cloud.cloud_x < -192.0 {
             #[cfg(not(target_arch = "wasm32"))]
             {
-                cloud_x = screen_width() + rng.random_range(150.0..=200.0);
+                cloud.cloud_x = screen_width() + rng.random_range(150.0..=200.0);
             }
             #[cfg(target_arch = "wasm32")]
             {
-                cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
+                cloud.cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
             }
         }
 
-        (cloud_timer, cloud_frame) = draw_cloud(&cloud, cloud_timer, cloud_frame, cloud_x).await;
+        (cloud.cloud_timer, cloud.cloud_frame) = entities::cloud::Cloud::draw_cloud(
+            &cloud.texture,
+            cloud.cloud_timer,
+            cloud.cloud_frame,
+            cloud.cloud_x,
+        )
+        .await;
 
         let umbrella_up = umbrella_start_time != 0.0 && (get_time() - umbrella_start_time) < 3.0;
         if umbrella_up {
@@ -327,7 +335,7 @@ async fn main() {
             floor_x = 0.0;
         }
 
-        if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
+        if (cloud.cloud_x <= 150.0 && cloud.cloud_x > 0.0) && !umbrella_up {
             game_over = true;
             if score_u32 > highscore {
                 highscore::HighscoreManager::save(score_u32);
@@ -338,41 +346,6 @@ async fn main() {
 
         next_frame().await;
     }
-}
-
-async fn draw_cloud(cloud: &Texture2D, mut timer: f32, mut frame: i32, cloud_x: f32) -> (f32, i32) {
-    let fps = 0.1;
-    let frame_width = 32.0;
-    let frame_height = 32.0;
-    draw_texture_ex(
-        &cloud,
-        cloud_x,
-        screen_height()
-            - 30.0
-            - get_responsive_size(frame_height) * 7.0
-            - get_responsive_size(32.0) * 5.0, // to take away the catty's height too
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(
-                get_responsive_size(frame_width) * 6.0,
-                get_responsive_size(frame_height) * 7.0,
-            )),
-            source: Some(Rect {
-                x: frame_width * frame as f32,
-                y: 0.0,
-                w: frame_width,
-                h: frame_height,
-            }),
-            ..Default::default()
-        },
-    );
-
-    timer += get_frame_time();
-    if timer > fps {
-        timer = 0.0;
-        frame = (frame + 1) % 7;
-    }
-    (timer, frame)
 }
 
 async fn draw_floor(floor: &Texture2D, floor_x: f32) {
