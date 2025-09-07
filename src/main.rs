@@ -1,6 +1,12 @@
 mod highscore;
 mod settings;
-mod ui;
+
+mod entities {
+    pub mod cat;
+    pub mod cloud;
+    pub mod floor;
+    pub mod umbrella;
+}
 
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
@@ -30,8 +36,12 @@ async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     let mut rng = rng();
 
-    let cat: Texture2D = load_texture("assets/cat.png").await.unwrap();
-    cat.set_filter(FilterMode::Nearest);
+    let mut cat = entities::cat::Cat {
+        texture: load_texture("assets/cat.png").await.unwrap(),
+        cat_frame: 0,
+        cat_timer: 0.0,
+        cat_run_speed: 0.05,
+    };
 
     let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
     cloud.set_filter(FilterMode::Nearest);
@@ -47,11 +57,6 @@ async fn main() {
 
     let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
-
-    // Catty variables :3
-    let mut cat_frame = 0;
-    let mut cat_timer = 0.0;
-    let mut cat_run_speed = 0.05;
 
     // Cloud variables ☁
     let mut cloud_frame = 0;
@@ -186,9 +191,12 @@ async fn main() {
                     settings::Settings::settings_menu(&settings_menu).await;
                 } else {
                     // Catty
-                    cat_frame = 0;
-                    cat_timer = 0.0;
-                    cat_run_speed = 0.05;
+                    cat = entities::cat::Cat {
+                        texture: load_texture("assets/cat.png").await.unwrap(),
+                        cat_frame: 0,
+                        cat_timer: 0.0,
+                        cat_run_speed: 0.05,
+                    };
 
                     // Cloudy
                     cloud_x = screen_width();
@@ -279,11 +287,11 @@ async fn main() {
             }
         }
 
-        if cat_run_speed > 0.01 {
-            cat_run_speed -= 0.0006 * dt;
+        if cat.cat_run_speed > 0.01 {
+            cat.cat_run_speed -= 0.0006 * dt;
         }
 
-        let scroll_speed = 7.5 / cat_run_speed;
+        let scroll_speed = 7.5 / cat.cat_run_speed;
 
         cloud_x -= scroll_speed * dt;
         if cloud_x < -192.0 {
@@ -304,7 +312,13 @@ async fn main() {
             draw_umbrella(&umbrella).await;
         }
 
-        (cat_timer, cat_frame) = draw_cat(&cat, cat_timer, cat_frame, cat_run_speed).await;
+        (cat.cat_timer, cat.cat_frame) = entities::cat::Cat::draw_cat(
+            &cat.texture,
+            cat.cat_timer,
+            cat.cat_frame,
+            cat.cat_run_speed,
+        )
+        .await;
 
         draw_floor(&floor_tex, floor_x).await;
 
@@ -324,42 +338,6 @@ async fn main() {
 
         next_frame().await;
     }
-}
-
-async fn draw_cat(
-    cat: &Texture2D,
-    mut timer: f32,
-    mut frame: i32,
-    cat_run_speed: f32,
-) -> (f32, i32) {
-    let frame_width = 32.0;
-    let frame_height = 32.0;
-    draw_texture_ex(
-        &cat,
-        100.0,
-        screen_height() - 26.0 - get_responsive_size(frame_height) * 5.0,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(
-                get_responsive_size(frame_width) * 5.0,
-                get_responsive_size(frame_height) * 5.0,
-            )),
-            source: Some(Rect {
-                x: frame_width * frame as f32,
-                y: 0.0,
-                w: frame_width,
-                h: frame_height,
-            }),
-            ..Default::default()
-        },
-    );
-
-    timer += get_frame_time();
-    if timer > cat_run_speed {
-        timer = 0.0;
-        frame = (frame + 1) % 3;
-    }
-    (timer, frame)
 }
 
 async fn draw_cloud(cloud: &Texture2D, mut timer: f32, mut frame: i32, cloud_x: f32) -> (f32, i32) {
