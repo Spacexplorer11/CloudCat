@@ -9,6 +9,19 @@ fn get_responsive_size(base_size: f32) -> f32 {
     base_size * scale_factor
 }
 
+fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, centre_y: bool) {
+    let font_size = get_responsive_size(base_font_size);
+    let details = measure_text(text, None, font_size as u16, 1.0);
+    let x = (screen_width() - details.width) / 2.0;
+
+    if centre_y {
+        let y = (screen_height() - details.height) / 2.0;
+        draw_text(text, x, y, font_size, colour);
+        return;
+    }
+    draw_text(text, x, y, font_size, colour);
+}
+
 struct HighscoreManager;
 
 impl HighscoreManager {
