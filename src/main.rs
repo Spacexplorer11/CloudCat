@@ -59,8 +59,13 @@ async fn main() {
     let floor_tex: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_tex.set_filter(FilterMode::Nearest);
 
-    let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
-    umbrella.set_filter(FilterMode::Nearest);
+    let umbrella_texture: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
+    umbrella_texture.set_filter(FilterMode::Nearest);
+
+    let mut umbrella = entities::umbrella::Umbrella {
+        texture: umbrella_texture,
+        umbrella_start_time: 0.0,
+    };
 
     let settings: Texture2D = load_texture("assets/settings.png").await.unwrap();
     settings.set_filter(FilterMode::Linear);
@@ -70,9 +75,6 @@ async fn main() {
 
     // Floor variable, just one :(
     let mut floor_x = 0.0;
-
-    // Umbrella variable! Squid games....
-    let mut umbrella_start_time = 0.0;
 
     // Game OVER RAWHHH >:)
     let mut game_over = false;
@@ -209,7 +211,7 @@ async fn main() {
                     floor_x = 0.0;
 
                     // Umbrellaaaaaaaa
-                    umbrella_start_time = 0.0;
+                    umbrella.umbrella_start_time = 0.0;
 
                     // Let's go back to the start!
                     game_over = false;
@@ -284,8 +286,10 @@ async fn main() {
         }
 
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-            if umbrella_start_time == 0.0 || get_time() - umbrella_start_time > 3.0 {
-                umbrella_start_time = get_time();
+            if umbrella.umbrella_start_time == 0.0
+                || get_time() - umbrella.umbrella_start_time > 3.0
+            {
+                umbrella.umbrella_start_time = get_time();
             }
         }
 
@@ -315,9 +319,10 @@ async fn main() {
         )
         .await;
 
-        let umbrella_up = umbrella_start_time != 0.0 && (get_time() - umbrella_start_time) < 3.0;
+        let umbrella_up = umbrella.umbrella_start_time != 0.0
+            && (get_time() - umbrella.umbrella_start_time) < 3.0;
         if umbrella_up {
-            draw_umbrella(&umbrella).await;
+            entities::umbrella::Umbrella::draw_umbrella(&umbrella.texture).await;
         }
 
         (cat.cat_timer, cat.cat_frame) = entities::cat::Cat::draw_cat(
@@ -365,29 +370,4 @@ async fn draw_floor(floor: &Texture2D, floor_x: f32) {
             },
         );
     }
-}
-
-async fn draw_umbrella(umbrella: &Texture2D) {
-    let umbrella_width = 32.0;
-    let umbrella_height = 32.0;
-
-    draw_texture_ex(
-        &umbrella,
-        100.0,
-        screen_height() - 20.0 - get_responsive_size(umbrella_height) * 8.0,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(
-                get_responsive_size(umbrella_width) * 7.0,
-                get_responsive_size(umbrella_height) * 8.0,
-            )),
-            source: Some(Rect {
-                x: 0.0,
-                y: 0.0,
-                w: umbrella_width,
-                h: umbrella_height,
-            }),
-            ..Default::default()
-        },
-    );
 }
