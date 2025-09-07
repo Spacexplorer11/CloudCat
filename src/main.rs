@@ -121,33 +121,15 @@ async fn main() {
         }
         if game_over {
             clear_background(RED);
-            draw_text(
-                "GAME OVER",
-                screen_width() * 0.25,
-                screen_height() * 0.5,
-                get_responsive_size(100.0),
-                DARKGRAY,
-            );
-            draw_text(
-                &format!("Your score was {}", score_u32),
-                screen_width() * 0.25,
-                screen_height() * 0.6,
-                get_responsive_size(50.0),
-                DARKGRAY,
-            );
+            draw_centred_text("GAME OVER", 100.0, 0.0, DARKGRAY, true);
+            draw_centred_text(&format!("Your score was {}", score_u32), 50.0, screen_height() * 0.6, DARKGRAY, false);
 
             #[cfg(target_arch = "wasm32")]
             let restart_message = "Please tap/click/hit space or refresh to play again";
             #[cfg(not(target_arch = "wasm32"))]
             let restart_message = "Please tap/click/hit space or restart the game to play again";
 
-            draw_text(
-                restart_message,
-                screen_width() * 0.2,
-                screen_height() * 0.7,
-                get_responsive_size(30.0),
-                DARKGRAY,
-            );
+            draw_centred_text(restart_message, 30.0,  screen_height() * 0.7, DARKGRAY, false);
 
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
                 // Catty
