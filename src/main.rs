@@ -28,7 +28,11 @@ impl HighscoreManager {
     fn load() -> u32 {
         let storage = STORAGE.lock().unwrap();
         let zero: String = "0".parse().unwrap();
-        storage.get("cloudcat_highscore").unwrap_or(zero).parse::<u32>().unwrap_or(0)
+        storage
+            .get("cloudcat_highscore")
+            .unwrap_or(zero)
+            .parse::<u32>()
+            .unwrap_or(0)
     }
 
     fn save(score: u32) {
@@ -85,33 +89,33 @@ async fn main() {
 
         if !game_started {
             clear_background(WHITE);
-            draw_text(
+            draw_centred_text(
                 "Please click/touch/hit space to put up the umbrella to protect your cat.",
-                screen_width() * 0.01,
+                30.0,
                 screen_height() * 0.3,
-                get_responsive_size(30.0),
                 DARKGRAY,
+                false,
             );
-            draw_text(
-                "The umbrella lasts 3 seconds",
-                screen_width() * 0.01,
+            draw_centred_text(
+                "The umbrella lasts 3 SECONDS",
+                40.0,
                 screen_height() * 0.4,
-                get_responsive_size(40.0),
                 RED,
+                false,
             );
-            draw_text(
+            draw_centred_text(
                 "The aim of the game is not let your cat get touched by rain",
-                screen_width() * 0.01,
+                40.0,
                 screen_height() * 0.5,
-                get_responsive_size(40.0),
                 DARKGRAY,
+                false,
             );
-            draw_text(
+            draw_centred_text(
                 "Click any key, tap or click anywhere to start the game",
-                screen_width() * 0.01,
+                40.0,
                 screen_height() * 0.6,
-                get_responsive_size(40.0),
                 DARKGRAY,
+                false,
             );
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
                 game_started = true;
@@ -122,14 +126,26 @@ async fn main() {
         if game_over {
             clear_background(RED);
             draw_centred_text("GAME OVER", 100.0, 0.0, DARKGRAY, true);
-            draw_centred_text(&format!("Your score was {}", score_u32), 50.0, screen_height() * 0.6, DARKGRAY, false);
+            draw_centred_text(
+                &format!("Your score was {}", score_u32),
+                50.0,
+                screen_height() * 0.6,
+                DARKGRAY,
+                false,
+            );
 
             #[cfg(target_arch = "wasm32")]
             let restart_message = "Please tap/click/hit space or refresh to play again";
             #[cfg(not(target_arch = "wasm32"))]
             let restart_message = "Please tap/click/hit space or restart the game to play again";
 
-            draw_centred_text(restart_message, 30.0,  screen_height() * 0.7, DARKGRAY, false);
+            draw_centred_text(
+                restart_message,
+                30.0,
+                screen_height() * 0.7,
+                DARKGRAY,
+                false,
+            );
 
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
                 // Catty
@@ -286,7 +302,10 @@ async fn draw_cat(
         screen_height() - 26.0 - get_responsive_size(frame_height) * 5.0,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(vec2(get_responsive_size(frame_width) * 5.0, get_responsive_size(frame_height) * 5.0)),
+            dest_size: Some(vec2(
+                get_responsive_size(frame_width) * 5.0,
+                get_responsive_size(frame_height) * 5.0,
+            )),
             source: Some(Rect {
                 x: frame_width * frame as f32,
                 y: 0.0,
@@ -312,10 +331,16 @@ async fn draw_cloud(cloud: &Texture2D, mut timer: f32, mut frame: i32, cloud_x: 
     draw_texture_ex(
         &cloud,
         cloud_x,
-        screen_height() - 30.0 - get_responsive_size(frame_height) * 7.0 - get_responsive_size(32.0) * 5.0, // to take away the catty's height too
+        screen_height()
+            - 30.0
+            - get_responsive_size(frame_height) * 7.0
+            - get_responsive_size(32.0) * 5.0, // to take away the catty's height too
         WHITE,
         DrawTextureParams {
-            dest_size: Some(vec2(get_responsive_size(frame_width) * 6.0, get_responsive_size(frame_height) * 7.0)),
+            dest_size: Some(vec2(
+                get_responsive_size(frame_width) * 6.0,
+                get_responsive_size(frame_height) * 7.0,
+            )),
             source: Some(Rect {
                 x: frame_width * frame as f32,
                 y: 0.0,
@@ -363,7 +388,10 @@ async fn draw_umbrella(umbrella: &Texture2D) {
         screen_height() - 20.0 - get_responsive_size(umbrella_height) * 8.0,
         WHITE,
         DrawTextureParams {
-            dest_size: Some(vec2(get_responsive_size(umbrella_width) * 7.0, get_responsive_size(umbrella_height) * 8.0)),
+            dest_size: Some(vec2(
+                get_responsive_size(umbrella_width) * 7.0,
+                get_responsive_size(umbrella_height) * 8.0,
+            )),
             source: Some(Rect {
                 x: 0.0,
                 y: 0.0,
