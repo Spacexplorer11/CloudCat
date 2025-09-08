@@ -45,7 +45,6 @@ async fn main() {
     cat_texture.set_filter(FilterMode::Nearest);
 
     let mut cat = cat::Cat {
-        texture: cat_texture,
         cat_frame: 0,
         cat_timer: 0.0,
         cat_run_speed: 0.05,
@@ -346,7 +345,7 @@ async fn main() {
         }
 
         (cat.cat_timer, cat.cat_frame) = cat::Cat::draw_cat(
-            &cat.texture,
+            &cat_texture,
             cat.cat_timer,
             cat.cat_frame,
             cat.cat_run_speed,

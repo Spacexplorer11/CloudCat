@@ -7,7 +7,6 @@ use macroquad::prelude::{
 
 pub(crate) struct Cat {
     // Catty variables :3
-    pub(crate) texture: Texture2D,
     pub(crate) cat_frame: i32,
     pub(crate) cat_timer: f32,
     pub(crate) cat_run_speed: f32,
