@@ -7,7 +7,6 @@ use macroquad::prelude::{
 
 pub(crate) struct Cloud {
     // Cloud variables ☁
-    pub(crate) texture: Texture2D,
     pub(crate) cloud_frame: i32,
     pub(crate) cloud_timer: f32,
     pub(crate) cloud_x: f32,
