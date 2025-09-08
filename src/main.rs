@@ -54,12 +54,11 @@ async fn main() {
     let cloud_texture: Texture2D = load_texture("assets/cloud.png").await.unwrap();
     cloud_texture.set_filter(FilterMode::Nearest);
 
-    let mut cloud = cloud::Cloud {
-        texture: cloud_texture,
+    let mut clouds: Vec<cloud::Cloud> = vec![cloud::Cloud {
         cloud_x: screen_width(),
         cloud_frame: 0,
         cloud_timer: 0.0,
-    };
+    }];
 
     let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
@@ -210,9 +209,11 @@ async fn main() {
                     cat.cat_run_speed = 0.05;
 
                     // Cloudy
-                    cloud.cloud_x = screen_width();
-                    cloud.cloud_frame = 0;
-                    cloud.cloud_timer = 0.0;
+                    for cloud in &mut clouds {
+                        cloud.cloud_x = screen_width();
+                        cloud.cloud_frame = 0;
+                        cloud.cloud_timer = 0.0;
+                    }
 
                     // Floorrrrrrr
                     floor.floor_x = 0.0;
@@ -306,25 +307,41 @@ async fn main() {
 
         let scroll_speed = 7.5 / cat.cat_run_speed;
 
-        cloud.cloud_x -= scroll_speed * dt;
-        if cloud.cloud_x < -192.0 {
-            #[cfg(not(target_arch = "wasm32"))]
-            {
-                cloud.cloud_x = screen_width() + rng.random_range(150.0..=200.0);
-            }
-            #[cfg(target_arch = "wasm32")]
-            {
-                cloud.cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
+        let mut positions: Vec<f32> = clouds.iter().map(|cloud| cloud.cloud_x).collect();
+        for cloud in &mut clouds {
+            cloud.cloud_x -= scroll_speed * dt;
+
+            if cloud.cloud_x < -192.0 {
+                #[cfg(not(target_arch = "wasm32"))]
+                let mut new_x = screen_width() + rng.random_range(150.0..=200.0);
+                #[cfg(target_arch = "wasm32")]
+                let mut new_x = screen_width() + rand::gen_range(150.0, 200.0);
+
+                let min_spacing = get_responsive_size(32.0) * 12.0;
+
+                for &pos in &positions {
+                    if (pos - new_x).abs() < min_spacing {
+                        new_x = pos + min_spacing;
+                    }
+                }
+
+                cloud.cloud_x = new_x;
+                cloud.cloud_frame = 0;
+                cloud.cloud_timer = 0.0;
+
+                positions.push(new_x);
             }
         }
 
-        (cloud.cloud_timer, cloud.cloud_frame) = cloud::Cloud::draw_cloud(
-            &cloud.texture,
-            cloud.cloud_timer,
-            cloud.cloud_frame,
-            cloud.cloud_x,
-        )
-        .await;
+        for cloud in &mut clouds {
+            (cloud.cloud_timer, cloud.cloud_frame) = cloud::Cloud::draw_cloud(
+                &cloud_texture,
+                cloud.cloud_timer,
+                cloud.cloud_frame,
+                cloud.cloud_x,
+            )
+            .await;
+        }
 
         let umbrella_up = umbrella.umbrella_start_time != 0.0
             && (get_time() - umbrella.umbrella_start_time) < 3.0;
@@ -347,14 +364,44 @@ async fn main() {
             floor.floor_x = 0.0;
         }
 
-        if (cloud.cloud_x <= 150.0 && cloud.cloud_x > 0.0) && !umbrella_up {
-            game_over = true;
-            if score_u32 > highscore {
-                highscore::HighscoreManager::save(score_u32);
+        for cloud in &clouds {
+            if (cloud.cloud_x <= 150.0 && cloud.cloud_x > 0.0) && !umbrella_up {
+                game_over = true;
+                if score_u32 > highscore {
+                    highscore::HighscoreManager::save(score_u32);
+                }
             }
         }
 
         score += 60.0 * dt;
+        #[cfg(not(target_arch = "wasm32"))]
+        let rand_int = rng.random_range(1..=1000);
+
+        #[cfg(target_arch = "wasm32")]
+        let rand_int = rand::gen_range(1..=1000);
+
+        if rand_int == 11 {
+            #[cfg(not(target_arch = "wasm32"))]
+            let new_cloud_x = screen_width() + rng.random_range(150.0..=200.0);
+
+            #[cfg(target_arch = "wasm32")]
+            let new_cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
+
+            let mut too_close_cloud = false;
+            for cloud in &clouds {
+                if (cloud.cloud_x - new_cloud_x).abs() <= get_responsive_size(32.0) * 20.0 {
+                    too_close_cloud = true;
+                    break;
+                }
+            }
+            if !too_close_cloud {
+                clouds.push(cloud::Cloud {
+                    cloud_x: new_cloud_x,
+                    cloud_frame: 0,
+                    cloud_timer: 0.0,
+                });
+            }
+        }
 
         next_frame().await;
     }
