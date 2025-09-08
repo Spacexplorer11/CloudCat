@@ -72,7 +72,6 @@ async fn main() {
     umbrella_texture.set_filter(FilterMode::Nearest);
 
     let mut umbrella = umbrella::Umbrella {
-        texture: umbrella_texture,
         umbrella_start_time: 0.0,
     };
 
@@ -346,7 +345,7 @@ async fn main() {
         let umbrella_up = umbrella.umbrella_start_time != 0.0
             && (get_time() - umbrella.umbrella_start_time) < 3.0;
         if umbrella_up {
-            umbrella::Umbrella::draw_umbrella(&umbrella.texture).await;
+            umbrella::Umbrella::draw_umbrella(&umbrella_texture).await;
         }
 
         (cat.cat_timer, cat.cat_frame) = cat::Cat::draw_cat(

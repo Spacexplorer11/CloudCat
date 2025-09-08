@@ -4,8 +4,7 @@ use macroquad::math::{Rect, vec2};
 use macroquad::prelude::{DrawTextureParams, Texture2D, draw_texture_ex, screen_height};
 
 pub(crate) struct Umbrella {
-    // Umbrella variables now, still reminds me of Squid Games...
-    pub(crate) texture: Texture2D,
+    // Umbrella variable reminds me of Squid Games...
     pub(crate) umbrella_start_time: f64,
 }
 
