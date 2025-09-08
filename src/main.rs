@@ -8,6 +8,11 @@ mod entities {
     pub mod umbrella;
 }
 
+use crate::entities::cat;
+use crate::entities::cloud;
+use crate::entities::floor;
+use crate::entities::umbrella;
+
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
@@ -39,7 +44,7 @@ async fn main() {
     let cat_texture = load_texture("assets/cat.png").await.unwrap();
     cat_texture.set_filter(FilterMode::Nearest);
 
-    let mut cat = entities::cat::Cat {
+    let mut cat = cat::Cat {
         texture: cat_texture,
         cat_frame: 0,
         cat_timer: 0.0,
@@ -49,7 +54,7 @@ async fn main() {
     let cloud_texture: Texture2D = load_texture("assets/cloud.png").await.unwrap();
     cloud_texture.set_filter(FilterMode::Nearest);
 
-    let mut cloud = entities::cloud::Cloud {
+    let mut cloud = cloud::Cloud {
         texture: cloud_texture,
         cloud_x: screen_width(),
         cloud_frame: 0,
@@ -59,7 +64,7 @@ async fn main() {
     let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
 
-    let mut floor = entities::floor::Floor {
+    let mut floor = floor::Floor {
         texture: floor_texture,
         floor_x: 0.0,
     };
@@ -67,7 +72,7 @@ async fn main() {
     let umbrella_texture: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
     umbrella_texture.set_filter(FilterMode::Nearest);
 
-    let mut umbrella = entities::umbrella::Umbrella {
+    let mut umbrella = umbrella::Umbrella {
         texture: umbrella_texture,
         umbrella_start_time: 0.0,
     };
@@ -313,7 +318,7 @@ async fn main() {
             }
         }
 
-        (cloud.cloud_timer, cloud.cloud_frame) = entities::cloud::Cloud::draw_cloud(
+        (cloud.cloud_timer, cloud.cloud_frame) = cloud::Cloud::draw_cloud(
             &cloud.texture,
             cloud.cloud_timer,
             cloud.cloud_frame,
@@ -324,10 +329,10 @@ async fn main() {
         let umbrella_up = umbrella.umbrella_start_time != 0.0
             && (get_time() - umbrella.umbrella_start_time) < 3.0;
         if umbrella_up {
-            entities::umbrella::Umbrella::draw_umbrella(&umbrella.texture).await;
+            umbrella::Umbrella::draw_umbrella(&umbrella.texture).await;
         }
 
-        (cat.cat_timer, cat.cat_frame) = entities::cat::Cat::draw_cat(
+        (cat.cat_timer, cat.cat_frame) = cat::Cat::draw_cat(
             &cat.texture,
             cat.cat_timer,
             cat.cat_frame,
@@ -335,7 +340,7 @@ async fn main() {
         )
         .await;
 
-        entities::floor::Floor::draw_floor(&floor.texture, floor.floor_x).await;
+        floor::Floor::draw_floor(&floor.texture, floor.floor_x).await;
 
         floor.floor_x -= scroll_speed * dt;
         if floor.floor_x <= -screen_width() {
