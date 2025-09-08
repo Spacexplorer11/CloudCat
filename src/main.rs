@@ -63,10 +63,7 @@ async fn main() {
     let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
 
-    let mut floor = floor::Floor {
-        texture: floor_texture,
-        floor_x: 0.0,
-    };
+    let mut floor = floor::Floor { floor_x: 0.0 };
 
     let umbrella_texture: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
     umbrella_texture.set_filter(FilterMode::Nearest);
@@ -356,7 +353,7 @@ async fn main() {
         )
         .await;
 
-        floor::Floor::draw_floor(&floor.texture, floor.floor_x).await;
+        floor::Floor::draw_floor(&floor_texture, floor.floor_x).await;
 
         floor.floor_x -= scroll_speed * dt;
         if floor.floor_x <= -screen_width() {

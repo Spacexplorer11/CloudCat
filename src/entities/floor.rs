@@ -5,8 +5,7 @@ use macroquad::prelude::{
 };
 
 pub(crate) struct Floor {
-    // Floor variables, yay now! :)
-    pub(crate) texture: Texture2D,
+    // Floor variable still :(
     pub(crate) floor_x: f32,
 }
 
