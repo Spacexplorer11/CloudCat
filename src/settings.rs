@@ -1,6 +1,8 @@
 use crate::get_responsive_size;
 use macroquad::color::WHITE;
-use macroquad::input::{MouseButton, is_mouse_button_pressed, mouse_position};
+use macroquad::input::{
+    KeyCode, MouseButton, is_key_pressed, is_mouse_button_pressed, mouse_position,
+};
 use macroquad::math::{Rect, vec2};
 use macroquad::prelude::{
     DrawTextureParams, Texture2D, clear_background, draw_texture_ex, next_frame, screen_height,
@@ -74,6 +76,10 @@ impl Settings {
                 if Self::is_settings_exit_clicked() {
                     break;
                 }
+            }
+
+            if is_key_pressed(KeyCode::Escape) {
+                break;
             }
             next_frame().await;
         }
