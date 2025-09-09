@@ -340,7 +340,7 @@ async fn main() {
 
         (cat.cat_timer, cat.cat_frame) = cat.draw_cat(&cat_texture).await;
 
-        floor::Floor::draw_floor(&floor_texture, floor.floor_x).await;
+        floor.draw_floor(&floor_texture).await;
 
         floor.floor_x -= scroll_speed * dt;
         if floor.floor_x <= -screen_width() {
