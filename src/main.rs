@@ -17,7 +17,7 @@ use crate::entities::umbrella;
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
 
-fn get_responsive_size(base_size: f32) -> f32 {
+pub(crate) fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
     let scale_factor = min_dimension * 0.0013;
     base_size * scale_factor
@@ -352,10 +352,10 @@ async fn main() {
             let cat_x = 100.0;
             let cat_width = get_responsive_size(32.0) * 5.0;
             let cloud_width = get_responsive_size(32.0) * 6.0;
-            
+
             let cloud_right = cloud.cloud_x + cloud_width;
             let cat_right = cat_x + cat_width;
-            
+
             if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
                 game_over = true;
                 if score_u32 > highscore {
