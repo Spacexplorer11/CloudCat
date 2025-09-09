@@ -335,7 +335,7 @@ async fn main() {
         let umbrella_up = umbrella.umbrella_start_time != 0.0
             && (get_time() - umbrella.umbrella_start_time) < 3.0;
         if umbrella_up {
-            umbrella::Umbrella::draw_umbrella(&umbrella_texture).await;
+            umbrella.draw_umbrella(&umbrella_texture).await;
         }
 
         (cat.cat_timer, cat.cat_frame) = cat.draw_cat(&cat_texture).await;

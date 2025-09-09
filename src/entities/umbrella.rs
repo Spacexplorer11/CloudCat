@@ -9,7 +9,7 @@ pub(crate) struct Umbrella {
 }
 
 impl Umbrella {
-    pub(crate) async fn draw_umbrella(umbrella: &Texture2D) {
+    pub(crate) async fn draw_umbrella(&self, umbrella: &Texture2D) {
         let umbrella_width = 32.0;
         let umbrella_height = 32.0;
 
