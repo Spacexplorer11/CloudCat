@@ -360,7 +360,15 @@ async fn main() {
         }
 
         for cloud in &clouds {
-            if (cloud.cloud_x <= 150.0 && cloud.cloud_x > 0.0) && !umbrella_up {
+            // Check if cloud overlaps with cat position
+            let cat_x = 100.0;
+            let cat_width = get_responsive_size(32.0) * 5.0;
+            let cloud_width = get_responsive_size(32.0) * 6.0;
+            
+            let cloud_right = cloud.cloud_x + cloud_width;
+            let cat_right = cat_x + cat_width;
+            
+            if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
                 game_over = true;
                 if score_u32 > highscore {
                     highscore::HighscoreManager::save(score_u32);
