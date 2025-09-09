@@ -329,13 +329,7 @@ async fn main() {
         }
 
         for cloud in &mut clouds {
-            (cloud.cloud_timer, cloud.cloud_frame) = cloud::Cloud::draw_cloud(
-                &cloud_texture,
-                cloud.cloud_timer,
-                cloud.cloud_frame,
-                cloud.cloud_x,
-            )
-            .await;
+            (cloud.cloud_timer, cloud.cloud_frame) = cloud.draw_cloud(&cloud_texture).await;
         }
 
         let umbrella_up = umbrella.umbrella_start_time != 0.0

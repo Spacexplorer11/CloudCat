@@ -13,18 +13,13 @@ pub(crate) struct Cloud {
 }
 
 impl Cloud {
-    pub(crate) async fn draw_cloud(
-        cloud: &Texture2D,
-        mut timer: f32,
-        mut frame: i32,
-        cloud_x: f32,
-    ) -> (f32, i32) {
+    pub(crate) async fn draw_cloud(&mut self, cloud: &Texture2D) -> (f32, i32) {
         let fps = 0.1;
         let frame_width = 32.0;
         let frame_height = 32.0;
         draw_texture_ex(
             &cloud,
-            cloud_x,
+            self.cloud_x,
             screen_height()
                 - 30.0
                 - get_responsive_size(frame_height) * 7.0
@@ -36,7 +31,7 @@ impl Cloud {
                     get_responsive_size(frame_height) * 7.0,
                 )),
                 source: Some(Rect {
-                    x: frame_width * frame as f32,
+                    x: frame_width * self.cloud_frame as f32,
                     y: 0.0,
                     w: frame_width,
                     h: frame_height,
@@ -45,11 +40,11 @@ impl Cloud {
             },
         );
 
-        timer += get_frame_time();
-        if timer > fps {
-            timer = 0.0;
-            frame = (frame + 1) % 7;
+        self.cloud_timer += get_frame_time();
+        if self.cloud_timer > fps {
+            self.cloud_timer = 0.0;
+            self.cloud_frame = (self.cloud_frame + 1) % 7;
         }
-        (timer, frame)
+        (self.cloud_timer, self.cloud_frame)
     }
 }
