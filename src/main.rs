@@ -1,27 +1,39 @@
+mod highscore;
+mod settings;
+
+mod entities {
+    pub mod cat;
+    pub mod cloud;
+    pub mod floor;
+    pub mod umbrella;
+}
+
+use crate::entities::cat;
+use crate::entities::cloud;
+use crate::entities::floor;
+use crate::entities::umbrella;
+
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
-use quad_storage::STORAGE;
 
-fn get_responsive_size(base_size: f32) -> f32 {
+pub(crate) fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
-    let scale_factor = (min_dimension / 800.0).max(0.2).min(2.5);
+    let scale_factor = min_dimension * 0.0013;
     base_size * scale_factor
 }
 
-struct HighscoreManager;
+fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, centre_y: bool) {
+    let font_size = get_responsive_size(base_font_size);
+    let details = measure_text(text, None, font_size as u16, 1.0);
+    let x = (screen_width() - details.width) / 2.0;
 
-impl HighscoreManager {
-    fn load() -> u32 {
-        let storage = STORAGE.lock().unwrap();
-        let zero: String = "0".parse().unwrap();
-        storage.get("cloudcat_highscore").unwrap_or(zero).parse::<u32>().unwrap_or(0)
+    if centre_y {
+        let y = (screen_height() - details.height) / 2.0;
+        draw_text(text, x, y, font_size, colour);
+        return;
     }
-
-    fn save(score: u32) {
-        let mut storage = STORAGE.lock().unwrap();
-        storage.set("cloudcat_highscore", &*score.to_string());
-    }
+    draw_text(text, x, y, font_size, colour);
 }
 
 #[macroquad::main("CloudCat")]
@@ -29,33 +41,41 @@ async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     let mut rng = rng();
 
-    let cat: Texture2D = load_texture("assets/cat.png").await.unwrap();
-    cat.set_filter(FilterMode::Nearest);
+    let cat_texture = load_texture("assets/cat.png").await.unwrap();
+    cat_texture.set_filter(FilterMode::Nearest);
 
-    let cloud: Texture2D = load_texture("assets/cloud.png").await.unwrap();
-    cloud.set_filter(FilterMode::Nearest);
+    let mut cat = cat::Cat {
+        cat_frame: 0,
+        cat_timer: 0.0,
+        cat_run_speed: 0.05,
+    };
 
-    let floor_tex: Texture2D = load_texture("assets/floor.png").await.unwrap();
-    floor_tex.set_filter(FilterMode::Nearest);
+    let cloud_texture: Texture2D = load_texture("assets/cloud.png").await.unwrap();
+    cloud_texture.set_filter(FilterMode::Nearest);
 
-    let umbrella: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
-    umbrella.set_filter(FilterMode::Nearest);
+    let mut clouds: Vec<cloud::Cloud> = vec![cloud::Cloud {
+        cloud_x: screen_width(),
+        cloud_frame: 0,
+        cloud_timer: 0.0,
+    }];
 
-    // Catty variables :3
-    let mut cat_frame = 0;
-    let mut cat_timer = 0.0;
-    let mut cat_run_speed = 0.05;
+    let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
+    floor_texture.set_filter(FilterMode::Nearest);
 
-    // Cloud variables ☁
-    let mut cloud_frame = 0;
-    let mut cloud_timer = 0.0;
-    let mut cloud_x = screen_width();
+    let mut floor = floor::Floor { floor_x: 0.0 };
 
-    // Floor variable, just one :(
-    let mut floor_x = 0.0;
+    let umbrella_texture: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
+    umbrella_texture.set_filter(FilterMode::Nearest);
 
-    // Umbrella variable! Squid games....
-    let mut umbrella_start_time = 0.0;
+    let mut umbrella = umbrella::Umbrella {
+        umbrella_start_time: 0.0,
+    };
+
+    let settings: Texture2D = load_texture("assets/settings.png").await.unwrap();
+    settings.set_filter(FilterMode::Linear);
+
+    let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
+    settings_menu.set_filter(FilterMode::Nearest);
 
     // Game OVER RAWHHH >:)
     let mut game_over = false;
@@ -65,76 +85,145 @@ async fn main() {
 
     // Score & Highscore RAWH
     let mut score = 0.0;
-    let highscore = HighscoreManager::load();
+    let mut highscore = highscore::HighscoreManager::load();
 
     loop {
         let score_u32 = score as u32;
 
         if !game_started {
             clear_background(WHITE);
-            draw_text(
+            draw_centred_text(
                 "Please click/touch/hit space to put up the umbrella to protect your cat.",
-                screen_width() * 0.01,
+                27.0,
                 screen_height() * 0.3,
-                get_responsive_size(30.0),
                 DARKGRAY,
+                false,
             );
-            draw_text(
-                "The umbrella lasts 3 seconds",
-                screen_width() * 0.01,
+            draw_centred_text(
+                "The umbrella lasts 3 SECONDS",
+                38.0,
                 screen_height() * 0.4,
-                get_responsive_size(40.0),
                 RED,
+                false,
             );
-            draw_text(
+            draw_centred_text(
                 "The aim of the game is not let your cat get touched by rain",
-                screen_width() * 0.01,
+                34.0,
                 screen_height() * 0.5,
-                get_responsive_size(40.0),
                 DARKGRAY,
+                false,
             );
-            draw_text(
+            draw_centred_text(
                 "Click any key, tap or click anywhere to start the game",
-                screen_width() * 0.01,
+                34.0,
                 screen_height() * 0.6,
-                get_responsive_size(40.0),
                 DARKGRAY,
+                false,
+            );
+
+            draw_texture_ex(
+                &settings,
+                screen_width() - get_responsive_size(32.0) * 2.5,
+                screen_height() - get_responsive_size(32.0) * 2.5,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 2.5,
+                        get_responsive_size(32.0) * 2.5,
+                    )),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
             );
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                game_started = true;
+                if settings::Settings::is_settings_clicked() {
+                    settings::Settings::settings_menu(&settings_menu).await;
+                } else {
+                    game_started = true;
+                }
             }
             next_frame().await;
             continue;
         }
         if game_over {
             clear_background(RED);
-            draw_text(
-                "GAME OVER",
-                screen_width() * 0.25,
-                screen_height() * 0.5,
-                get_responsive_size(100.0),
-                DARKGRAY,
-            );
-            draw_text(
+            draw_centred_text("GAME OVER", 100.0, 0.0, DARKGRAY, true);
+            draw_centred_text(
                 &format!("Your score was {}", score_u32),
-                screen_width() * 0.25,
+                50.0,
                 screen_height() * 0.6,
-                get_responsive_size(50.0),
                 DARKGRAY,
+                false,
             );
 
             #[cfg(target_arch = "wasm32")]
-            let restart_message = "Please refresh the page to play again";
+            let restart_message = "Please tap/click/hit space or refresh to play again";
             #[cfg(not(target_arch = "wasm32"))]
-            let restart_message = "Please restart the game to play again";
+            let restart_message = "Please tap/click/hit space or restart the game to play again";
 
-            draw_text(
+            draw_centred_text(
                 restart_message,
-                screen_width() * 0.2,
+                30.0,
                 screen_height() * 0.7,
-                get_responsive_size(30.0),
                 DARKGRAY,
+                false,
             );
+
+            draw_texture_ex(
+                &settings,
+                screen_width() - get_responsive_size(32.0) * 2.5,
+                screen_height() - get_responsive_size(32.0) * 2.5,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 2.5,
+                        get_responsive_size(32.0) * 2.5,
+                    )),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
+
+            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
+                if settings::Settings::is_settings_clicked() {
+                    settings::Settings::settings_menu(&settings_menu).await;
+                } else {
+                    // Catty
+                    cat.cat_frame = 0;
+                    cat.cat_timer = 0.0;
+                    cat.cat_run_speed = 0.05;
+
+                    // Cloudy
+                    for cloud in &mut clouds {
+                        cloud.cloud_x = screen_width();
+                        cloud.cloud_frame = 0;
+                        cloud.cloud_timer = 0.0;
+                    }
+
+                    // Floorrrrrrr
+                    floor.floor_x = 0.0;
+
+                    // Umbrellaaaaaaaa
+                    umbrella.umbrella_start_time = 0.0;
+
+                    // Let's go back to the start!
+                    game_over = false;
+                    game_started = false;
+                    highscore = highscore::HighscoreManager::load();
+                    score = 0.0;
+                    continue;
+                }
+            }
             next_frame().await;
             continue;
         }
@@ -200,157 +289,111 @@ async fn main() {
         }
 
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-            if umbrella_start_time == 0.0 || get_time() - umbrella_start_time > 3.0 {
-                umbrella_start_time = get_time();
-            }
-        }
-
-        if cat_run_speed > 0.01 {
-            cat_run_speed -= 0.0006 * dt;
-        }
-
-        let scroll_speed = 7.5 / cat_run_speed;
-
-        cloud_x -= scroll_speed * dt;
-        if cloud_x < -192.0 {
-            #[cfg(not(target_arch = "wasm32"))]
+            if umbrella.umbrella_start_time == 0.0
+                || get_time() - umbrella.umbrella_start_time > 3.0
             {
-                cloud_x = screen_width() + rng.random_range(150.0..=200.0);
-            }
-            #[cfg(target_arch = "wasm32")]
-            {
-                cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
+                umbrella.umbrella_start_time = get_time();
             }
         }
 
-        (cloud_timer, cloud_frame) = draw_cloud(&cloud, cloud_timer, cloud_frame, cloud_x).await;
+        if cat.cat_run_speed > 0.01 {
+            cat.cat_run_speed -= 0.0006 * dt;
+        }
 
-        let umbrella_up = umbrella_start_time != 0.0 && (get_time() - umbrella_start_time) < 3.0;
+        let scroll_speed = 7.5 / cat.cat_run_speed;
+
+        let mut positions: Vec<f32> = clouds.iter().map(|cloud| cloud.cloud_x).collect();
+        for cloud in &mut clouds {
+            cloud.cloud_x -= scroll_speed * dt;
+
+            if cloud.cloud_x < -192.0 {
+                #[cfg(not(target_arch = "wasm32"))]
+                let mut new_x = screen_width() + rng.random_range(150.0..=200.0);
+                #[cfg(target_arch = "wasm32")]
+                let mut new_x = screen_width() + rand::gen_range(150.0, 200.0);
+
+                let min_spacing = get_responsive_size(32.0) * 12.0;
+
+                for &pos in &positions {
+                    if (pos - new_x).abs() < min_spacing {
+                        new_x = pos + min_spacing;
+                    }
+                }
+
+                cloud.cloud_x = new_x;
+                cloud.cloud_frame = 0;
+                cloud.cloud_timer = 0.0;
+
+                positions.push(new_x);
+            }
+        }
+
+        for cloud in &mut clouds {
+            (cloud.cloud_timer, cloud.cloud_frame) = cloud.draw_cloud(&cloud_texture).await;
+        }
+
+        let umbrella_up = umbrella.umbrella_start_time != 0.0
+            && (get_time() - umbrella.umbrella_start_time) < 3.0;
         if umbrella_up {
-            draw_umbrella(&umbrella).await;
+            umbrella.draw_umbrella(&umbrella_texture).await;
         }
 
-        (cat_timer, cat_frame) = draw_cat(&cat, cat_timer, cat_frame, cat_run_speed).await;
+        (cat.cat_timer, cat.cat_frame) = cat.draw_cat(&cat_texture).await;
 
-        draw_floor(&floor_tex, floor_x).await;
+        floor.draw_floor(&floor_texture).await;
 
-        floor_x -= scroll_speed * dt;
-        if floor_x <= -screen_width() {
-            floor_x = 0.0;
+        floor.floor_x -= scroll_speed * dt;
+        if floor.floor_x <= -screen_width() {
+            floor.floor_x = 0.0;
         }
 
-        if (cloud_x <= 150.0 && cloud_x > 0.0) && !umbrella_up {
-            game_over = true;
-            if score_u32 > highscore {
-                HighscoreManager::save(score_u32);
+        for cloud in &clouds {
+            // Check if cloud overlaps with cat position
+            let cat_x = 100.0;
+            let cat_width = get_responsive_size(32.0) * 5.0;
+            let cloud_width = get_responsive_size(32.0) * 6.0;
+
+            let cloud_right = cloud.cloud_x + cloud_width;
+            let cat_right = cat_x + cat_width;
+
+            if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
+                game_over = true;
+                if score_u32 > highscore {
+                    highscore::HighscoreManager::save(score_u32);
+                }
             }
         }
 
         score += 60.0 * dt;
+        #[cfg(not(target_arch = "wasm32"))]
+        let rand_int = rng.random_range(1..=1000);
+
+        #[cfg(target_arch = "wasm32")]
+        let rand_int = rand::gen_range(1, 1000);
+
+        if rand_int == 11 {
+            #[cfg(not(target_arch = "wasm32"))]
+            let new_cloud_x = screen_width() + rng.random_range(150.0..=200.0);
+
+            #[cfg(target_arch = "wasm32")]
+            let new_cloud_x = screen_width() + rand::gen_range(150.0, 200.0);
+
+            let mut too_close_cloud = false;
+            for cloud in &clouds {
+                if (cloud.cloud_x - new_cloud_x).abs() <= get_responsive_size(32.0) * 20.0 {
+                    too_close_cloud = true;
+                    break;
+                }
+            }
+            if !too_close_cloud {
+                clouds.push(cloud::Cloud {
+                    cloud_x: new_cloud_x,
+                    cloud_frame: 0,
+                    cloud_timer: 0.0,
+                });
+            }
+        }
 
         next_frame().await;
     }
-}
-
-async fn draw_cat(
-    cat: &Texture2D,
-    mut timer: f32,
-    mut frame: i32,
-    cat_run_speed: f32,
-) -> (f32, i32) {
-    let frame_width = 32.0;
-    let frame_height = 32.0;
-    draw_texture_ex(
-        &cat,
-        100.0,
-        screen_height() - 26.0 - get_responsive_size(frame_height) * 5.0,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(get_responsive_size(frame_width) * 5.0, get_responsive_size(frame_height) * 5.0)),
-            source: Some(Rect {
-                x: frame_width * frame as f32,
-                y: 0.0,
-                w: frame_width,
-                h: frame_height,
-            }),
-            ..Default::default()
-        },
-    );
-
-    timer += get_frame_time();
-    if timer > cat_run_speed {
-        timer = 0.0;
-        frame = (frame + 1) % 3;
-    }
-    (timer, frame)
-}
-
-async fn draw_cloud(cloud: &Texture2D, mut timer: f32, mut frame: i32, cloud_x: f32) -> (f32, i32) {
-    let fps = 0.1;
-    let frame_width = 32.0;
-    let frame_height = 32.0;
-    draw_texture_ex(
-        &cloud,
-        cloud_x,
-        screen_height() - 30.0 - get_responsive_size(frame_height) * 7.0 - get_responsive_size(32.0) * 5.0, // to take away the catty's height too
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(get_responsive_size(frame_width) * 6.0, get_responsive_size(frame_height) * 7.0)),
-            source: Some(Rect {
-                x: frame_width * frame as f32,
-                y: 0.0,
-                w: frame_width,
-                h: frame_height,
-            }),
-            ..Default::default()
-        },
-    );
-
-    timer += get_frame_time();
-    if timer > fps {
-        timer = 0.0;
-        frame = (frame + 1) % 7;
-    }
-    (timer, frame)
-}
-
-async fn draw_floor(floor: &Texture2D, floor_x: f32) {
-    let floor_width = screen_width();
-    let floor_height = 24.0;
-
-    for offset in [0.0, floor_width].iter() {
-        draw_texture_ex(
-            &floor,
-            floor_x + *offset,
-            screen_height() - 45.0,
-            WHITE,
-            DrawTextureParams {
-                dest_size: Some(vec2(floor_width, floor_height)),
-                source: None,
-                ..Default::default()
-            },
-        );
-    }
-}
-
-async fn draw_umbrella(umbrella: &Texture2D) {
-    let umbrella_width = 32.0;
-    let umbrella_height = 32.0;
-
-    draw_texture_ex(
-        &umbrella,
-        100.0,
-        screen_height() - 20.0 - get_responsive_size(umbrella_height) * 8.0,
-        WHITE,
-        DrawTextureParams {
-            dest_size: Some(vec2(get_responsive_size(umbrella_width) * 7.0, get_responsive_size(umbrella_height) * 8.0)),
-            source: Some(Rect {
-                x: 0.0,
-                y: 0.0,
-                w: umbrella_width,
-                h: umbrella_height,
-            }),
-            ..Default::default()
-        },
-    );
 }
