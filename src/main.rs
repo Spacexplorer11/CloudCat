@@ -344,13 +344,7 @@ async fn main() {
             umbrella::Umbrella::draw_umbrella(&umbrella_texture).await;
         }
 
-        (cat.cat_timer, cat.cat_frame) = cat::Cat::draw_cat(
-            &cat_texture,
-            cat.cat_timer,
-            cat.cat_frame,
-            cat.cat_run_speed,
-        )
-        .await;
+        (cat.cat_timer, cat.cat_frame) = cat.draw_cat(&cat_texture).await;
 
         floor::Floor::draw_floor(&floor_texture, floor.floor_x).await;
 

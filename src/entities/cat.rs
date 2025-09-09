@@ -13,12 +13,7 @@ pub(crate) struct Cat {
 }
 
 impl Cat {
-    pub(crate) async fn draw_cat(
-        cat: &Texture2D,
-        mut timer: f32,
-        mut frame: i32,
-        cat_run_speed: f32,
-    ) -> (f32, i32) {
+    pub(crate) async fn draw_cat(&mut self, cat: &Texture2D) -> (f32, i32) {
         let frame_width = 32.0;
         let frame_height = 32.0;
         draw_texture_ex(
@@ -32,7 +27,7 @@ impl Cat {
                     get_responsive_size(frame_height) * 5.0,
                 )),
                 source: Some(Rect {
-                    x: frame_width * frame as f32,
+                    x: frame_width * self.cat_frame as f32,
                     y: 0.0,
                     w: frame_width,
                     h: frame_height,
@@ -41,11 +36,11 @@ impl Cat {
             },
         );
 
-        timer += get_frame_time();
-        if timer > cat_run_speed {
-            timer = 0.0;
-            frame = (frame + 1) % 3;
+        self.cat_timer += get_frame_time();
+        if self.cat_timer > self.cat_run_speed {
+            self.cat_timer = 0.0;
+            self.cat_frame = (self.cat_frame + 1) % 3;
         }
-        (timer, frame)
+        (self.cat_timer, self.cat_frame)
     }
 }
