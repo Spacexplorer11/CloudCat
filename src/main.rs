@@ -154,6 +154,9 @@ async fn main() {
             continue;
         }
         if game_over {
+            if score_u32 > highscore {
+                highscore::HighscoreManager::save(score_u32);
+            }
             clear_background(RED);
             draw_centred_text("GAME OVER", 100.0, 0.0, DARKGRAY, true);
             draw_centred_text(
@@ -370,9 +373,6 @@ async fn main() {
 
             if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
                 game_over = true;
-                if score_u32 > highscore {
-                    highscore::HighscoreManager::save(score_u32);
-                }
             }
         }
 
