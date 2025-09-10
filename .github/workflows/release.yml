@@ -142,49 +142,6 @@ jobs:
         if: env.SHOULD_RELEASE == 'true'
         run: cargo test --all --locked
 
-      - name: Generate release notes with Gemini
-        if: env.SHOULD_RELEASE == 'true'
-        run: |
-          echo "Fetching commits..."
-
-          # Ensure fallback if no previous tag exists
-          if [ -z "$LATEST_TAG" ]; then
-            # Leave LATEST_TAG empty; we'll fetch all history below if needed
-            LATEST_TAG=""
-          fi
-
-          if [ -n "$LATEST_TAG" ]; then
-            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s")
-          else
-            COMMITS=$(git log --pretty=format:"- %s")
-          fi
-
-          PROMPT=$(printf "Summarise the following commit messages into a clear and concise changelog:\n%s" "$COMMITS")
-          echo "PROMPT:"
-          echo "$PROMPT"
-
-          JSON=$(jq -n \
-            --arg prompt "$PROMPT" \
-            '{
-              contents: [{
-                role: "user",
-                parts: [{ text: $prompt }]
-              }]
-            }')
-
-          curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent" \
-            -H "Content-Type: application/json" \
-            -H "X-goog-api-key: ${{ secrets.GEMINI_API_KEY }}" \
-            -d "$JSON" \
-            | tee full-response.json \
-            | jq -r '.candidates[0].content.parts[0].text' > release-notes.md
-
-      - name: Push new tag
-        if: env.SHOULD_RELEASE == 'true'
-        run: |
-          git tag $NEW_TAG
-          git push origin $NEW_TAG
-
       - name: Install required Rust targets (Linux and Windows)
         if: env.SHOULD_RELEASE == 'true'
         run: |
@@ -232,13 +189,6 @@ jobs:
           name: cloudcat-windows-x86_64
           path: cloudcat-windows-x86_64.zip
 
-      - name: Upload release notes
-        if: env.SHOULD_RELEASE == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-notes
-          path: release-notes.md
-
   release:
     runs-on: ubuntu-latest
     needs: [build-macos, build-linux-windows]
@@ -250,6 +200,44 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           merge-multiple: true
+
+      - name: Generate release notes with Gemini
+        run: |
+          echo "Fetching commits..."
+
+          LATEST_TAG="${{ env.LATEST_TAG }}"
+
+          if [ -n "$LATEST_TAG" ]; then
+            COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s")
+          else
+            COMMITS=$(git log --pretty=format:"- %s")
+          fi
+
+          PROMPT=$(printf "Summarise the following commit messages into a clear, user-friendly changelog in markdown.\n- Group related changes together under headings if possible (e.g. Features, Fixes, Improvements).\n- Write in concise past tense or imperative style (e.g. \"Fixed crash when...\", \"Add support for...\").\n- Do not include any extra text outside the changelog itself.\n\nCommit messages:\n%s" "$COMMITS")
+          echo "PROMPT:"
+          echo "$PROMPT"
+
+          JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            '{
+              contents: [{
+                role: "user",
+                parts: [{ text: $prompt }]
+              }]
+            }')
+
+          curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent" \
+            -H "Content-Type: application/json" \
+            -H "X-goog-api-key: ${{ secrets.GEMINI_API_KEY }}" \
+            -d "$JSON" \
+            | tee full-response.json \
+            | jq -r '.candidates[0].content.parts[0].text' > release-notes.md
+
+      - name: Push new tag
+        run: |
+          NEW_TAG="${{ needs.build-linux-windows.outputs.new-tag }}"
+          git tag $NEW_TAG
+          git push origin $NEW_TAG
 
       - name: Create GitHub Release with gh CLI
         run: |
