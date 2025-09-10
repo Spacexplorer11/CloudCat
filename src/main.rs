@@ -366,10 +366,10 @@ async fn main() {
 
         score += 60.0 * dt;
         #[cfg(not(target_arch = "wasm32"))]
-        let rand_int = rng.random_range(1..=1000);
+        let rand_int = rng.random_range(1..=(50 * ((cat.cat_run_speed * 1000.0) as i32)));
 
         #[cfg(target_arch = "wasm32")]
-        let rand_int = rand::gen_range(1, 1000);
+        let rand_int = rand::gen_range(1..=(50 * ((cat.cat_run_speed * 1000.0) as i32)));
 
         if rand_int == 11 {
             #[cfg(not(target_arch = "wasm32"))]
