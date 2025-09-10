@@ -59,6 +59,9 @@ async fn main() {
         cloud_timer: 0.0,
     }];
 
+    // Which clouds must be incinerated :(
+    let mut clouds_to_die: Vec<usize> = vec![];
+
     let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
 
@@ -303,30 +306,39 @@ async fn main() {
         let scroll_speed = 7.5 / cat.cat_run_speed;
 
         let mut positions: Vec<f32> = clouds.iter().map(|cloud| cloud.cloud_x).collect();
-        for cloud in &mut clouds {
+        for (i, cloud) in &mut clouds.iter_mut().enumerate() {
             cloud.cloud_x -= scroll_speed * dt;
 
             if cloud.cloud_x < -192.0 {
-                #[cfg(not(target_arch = "wasm32"))]
-                let mut new_x = screen_width() + rng.random_range(150.0..=200.0);
-                #[cfg(target_arch = "wasm32")]
-                let mut new_x = screen_width() + rand::gen_range(150.0, 200.0);
+                if i == 0 {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    let mut new_x = screen_width() + rng.random_range(150.0..=200.0);
+                    #[cfg(target_arch = "wasm32")]
+                    let mut new_x = screen_width() + rand::gen_range(150.0, 200.0);
 
-                let min_spacing = get_responsive_size(32.0) * 12.0;
+                    let min_spacing = get_responsive_size(32.0) * 12.0;
 
-                for &pos in &positions {
-                    if (pos - new_x).abs() < min_spacing {
-                        new_x = pos + min_spacing;
+                    for &pos in &positions {
+                        if (pos - new_x).abs() < min_spacing {
+                            new_x = pos + min_spacing;
+                        }
                     }
+
+                    cloud.cloud_x = new_x;
+                    cloud.cloud_frame = 0;
+                    cloud.cloud_timer = 0.0;
+
+                    positions.push(new_x);
+                } else {
+                    clouds_to_die.push(i);
                 }
-
-                cloud.cloud_x = new_x;
-                cloud.cloud_frame = 0;
-                cloud.cloud_timer = 0.0;
-
-                positions.push(new_x);
             }
         }
+
+        for cloud_index in &mut clouds_to_die {
+            clouds.remove(*cloud_index);
+        }
+        clouds_to_die.clear();
 
         for cloud in &mut clouds {
             (cloud.cloud_timer, cloud.cloud_frame) = cloud.draw_cloud(&cloud_texture).await;
