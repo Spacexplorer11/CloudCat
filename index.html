@@ -2,49 +2,56 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>CloudCat</title>
-    <style>
-        html,
-        body,
-        canvas {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: absolute;
-            background: black;
-            z-index: 0;
-        }
-    </style>
-    <link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
-<link rel="shortcut icon" href="/favicons/favicon.ico" />
-<link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
-<meta name="apple-mobile-web-app-title" content="CloudCat" />
-<link rel="manifest" href="/favicons/site.webmanifest" />
+	<meta charset="utf-8">
+	<title>CloudCat</title>
+	<style>
+		html,
+		body,
+		canvas {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			position: absolute;
+			background: black;
+			z-index: 0;
+		}
+	</style>
+	<link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96"/>
+	<link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg"/>
+	<link rel="shortcut icon" href="/favicons/favicon.ico"/>
+	<link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png"/>
+	<meta name="apple-mobile-web-app-title" content="CloudCat"/>
+	<link rel="manifest" href="/favicons/site.webmanifest"/>
+	<!-- Cloudflare Web Analytics -->
+	<script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+	        data-cf-beacon='{"token": "62c65fcda395427bb29cdac758705af0"}'></script>
+	<!-- End Cloudflare Web Analytics -->
 </head>
 
 <body>
-    <canvas id="glcanvas" tabindex='1'></canvas>
-    <h1 style="color: white; font-size: xxx-large; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" id="loading-message">Loading...</h1>
-    <div id="gh-sponsor-button"
-         style="position:absolute; top:10px; left:10px; z-index:10;">
-        <!-- GitHub Sponsors -->
-        <iframe
-            src="https://github.com/sponsors/Spacexplorer11/button"
-            title="Sponsor Spacexplorer11"
-            height="32"
-            width="114"
-            style="border:0; border-radius:6px;"
-        ></iframe>
-    </div>
-    <div id="bmc-button"
-         style="position:absolute; top:10px; right:10px; z-index:10;">
-	    <a href="https://www.buymeacoffee.com/spacexplorer11" target="_blank" style="cursor: pointer;"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
-    </div>
-    <div id="turn-phone" style="
+<canvas id="glcanvas" tabindex='1'></canvas>
+<h1 style="color: white; font-size: xxx-large; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+    id="loading-message">Loading...</h1>
+<div id="gh-sponsor-button"
+     style="position:absolute; top:10px; left:10px; z-index:10;">
+	<!-- GitHub Sponsors -->
+	<iframe
+			src="https://github.com/sponsors/Spacexplorer11/button"
+			title="Sponsor Spacexplorer11"
+			height="32"
+			width="114"
+			style="border:0; border-radius:6px;"
+	></iframe>
+</div>
+<div id="bmc-button"
+     style="position:absolute; top:10px; right:10px; z-index:10;">
+	<a href="https://www.buymeacoffee.com/spacexplorer11" target="_blank" style="cursor: pointer;"><img
+			src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee"
+			style="height: 60px !important;width: 217px !important;"></a>
+</div>
+<div id="turn-phone" style="
        display: none;
        position: fixed;
        top: 0; left: 0;
@@ -56,31 +63,33 @@
        align-items: center;
        justify-content: center;
      ">
-	    <h1 style="margin-bottom: 10vh;">Please turn your device to landscape</h1>
-	    <img src="/assets/turn-phone.png" alt="an image showing to turn your device to landscape" style="width:40vh; height:40vh; image-rendering: pixelated; image-rendering: crisp-edges;">
-    </div>
-    <script>
-	    const turn_phone = document.getElementById("turn-phone");
-	    function updateOrientation() {
-		    if (window.matchMedia("(orientation: portrait)").matches) {
-			    turn_phone.style.display = "block";
-		    } else {
-			    turn_phone.style.display = "none";
-		    }
-	    }
+	<h1 style="margin-bottom: 10vh;">Please turn your device to landscape</h1>
+	<img src="/assets/turn-phone.png" alt="an image showing to turn your device to landscape"
+	     style="width:40vh; height:40vh; image-rendering: pixelated; image-rendering: crisp-edges;">
+</div>
+<script>
+	const turn_phone = document.getElementById("turn-phone");
 
-	    updateOrientation();
+	function updateOrientation() {
+		if (window.matchMedia("(orientation: portrait)").matches) {
+			turn_phone.style.display = "block";
+		} else {
+			turn_phone.style.display = "none";
+		}
+	}
 
-	    window.matchMedia("(orientation: portrait)")
-			    .addEventListener("change", updateOrientation);
-    </script>
-    <script src="gl.js"></script>
-    <script src="sapp_jsutils.js"></script>
-    <script src="quad-storage.js"></script>
-    <script>
-        load("cloudcat.wasm");
-		document.getElementById("loading-message").style.display = "none";
-    </script>
+	updateOrientation();
+
+	window.matchMedia("(orientation: portrait)")
+			.addEventListener("change", updateOrientation);
+</script>
+<script src="gl.js"></script>
+<script src="sapp_jsutils.js"></script>
+<script src="quad-storage.js"></script>
+<script>
+	load("cloudcat.wasm");
+	document.getElementById("loading-message").style.display = "none";
+</script>
 </body>
 
 </html>
