@@ -1,5 +1,5 @@
 use crate::{draw_centred_text, get_responsive_size};
-use macroquad::color::{ORANGE, WHITE};
+use macroquad::color::{BLACK, ORANGE, WHITE};
 use macroquad::input::{
     KeyCode, MouseButton, is_key_pressed, is_mouse_button_pressed, mouse_position,
 };
@@ -80,6 +80,26 @@ impl Settings {
                     - (get_responsive_size(32.0) * 15.0) * 0.5
                     - get_responsive_size(20.0),
                 ORANGE,
+                false,
+            );
+
+            draw_centred_text(
+                "Check out the github repo:",
+                35.0,
+                screen_height() * 0.8
+                    - (get_responsive_size(32.0) * 15.0) * 0.5
+                    - get_responsive_size(20.0),
+                BLACK,
+                false,
+            );
+
+            draw_centred_text(
+                "https://github.com/spacexplorer11/cloudcat",
+                23.0,
+                screen_height() * 0.85
+                    - (get_responsive_size(32.0) * 15.0) * 0.5
+                    - get_responsive_size(20.0),
+                BLACK,
                 false,
             );
             if is_mouse_button_pressed(MouseButton::Left) {
