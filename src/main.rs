@@ -291,7 +291,7 @@ async fn main() {
         } else {
             draw_text(
                 &format!("Your previous highscore was {}", highscore),
-                0.0,
+                20.0,
                 50.0,
                 get_responsive_size(40.0),
                 DARKGRAY,
