@@ -187,6 +187,22 @@ async fn main() {
                 false,
             );
 
+            draw_centred_text(
+                "Thanks for playing CloudCat by Akaalroop Singh",
+                34.0,
+                screen_height() * 0.9,
+                DARKGRAY,
+                false,
+            );
+
+            draw_centred_text(
+                "(spacexplorer11 on GitHub)",
+                34.0,
+                screen_height() * 0.95,
+                DARKGRAY,
+                false,
+            );
+
             draw_texture_ex(
                 &settings,
                 screen_width() - get_responsive_size(32.0) * 2.5,
