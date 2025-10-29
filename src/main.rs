@@ -123,6 +123,13 @@ async fn main() {
                 DARKGRAY,
                 false,
             );
+            draw_centred_text(
+                "Made with <3 by Akaalroop Singh (spacexplorer11 on GitHub)",
+                34.0,
+                screen_height() * 0.9,
+                DARKGRAY,
+                false,
+            );
 
             draw_texture_ex(
                 &settings,
