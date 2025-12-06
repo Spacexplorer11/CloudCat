@@ -9,11 +9,11 @@ mod entities {
 }
 
 use crate::Color;
-use crate::entities::cat;
 use crate::entities::cloud;
 use crate::entities::floor;
 use crate::entities::umbrella;
 
+use crate::entities::cat::Cat;
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
@@ -45,7 +45,7 @@ async fn main() {
     let cat_texture = load_texture("assets/cat.png").await.unwrap();
     cat_texture.set_filter(FilterMode::Nearest);
 
-    let mut cat = cat::Cat {
+    let mut cat = Cat {
         cat_frame: 0,
         cat_timer: 0.0,
         cat_run_speed: 0.05,
@@ -91,6 +91,14 @@ async fn main() {
     let mut title_screen_frame: u16 = 0;
     let mut title_screen_opacity: f32 = 1.0;
 
+    // Special extra TITLE cat object (our catty ain't an object but... yeah thats what we call the collection of variables I think... or is it Struct or idk man)
+    let mut title_cat = Cat {
+        cat_frame: 0,
+        cat_timer: 0.0,
+        cat_run_speed: 0.05,
+    };
+    let mut title_cat_x = 0.0;
+
     // Score & Highscore RAWH
     let mut score = 0.0;
     let mut highscore = highscore::HighscoreManager::load();
@@ -100,6 +108,30 @@ async fn main() {
 
         if title_screen_frame < 500 {
             clear_background(WHITE);
+            draw_texture_ex(
+                &cat_texture,
+                title_cat_x,
+                screen_height() * 0.2,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 5.0,
+                        get_responsive_size(32.0) * 5.0,
+                    )),
+                    source: Some(Rect {
+                        x: 32.0 * title_cat.cat_frame as f32,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
+            title_cat.cat_timer += get_frame_time();
+            if title_cat.cat_timer > title_cat.cat_run_speed {
+                title_cat.cat_timer = 0.0;
+                title_cat.cat_frame = (title_cat.cat_frame + 1) % 3;
+            }
             draw_centred_text(
                 "CloudCat",
                 50.0,
@@ -127,6 +159,7 @@ async fn main() {
 
             title_screen_frame += 1;
             title_screen_opacity -= 0.0016;
+            title_cat_x += screen_width() / 500.0;
             next_frame().await;
             continue;
         }
