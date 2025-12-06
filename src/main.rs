@@ -8,6 +8,7 @@ mod entities {
     pub mod umbrella;
 }
 
+use crate::Color;
 use crate::entities::cat;
 use crate::entities::cloud;
 use crate::entities::floor;
@@ -86,12 +87,49 @@ async fn main() {
     // Has da game started?? mrow :3
     let mut game_started = false;
 
+    // Some lil title screen variables ~ idk what else to say bro
+    let mut title_screen_frame: u16 = 0;
+    let mut title_screen_opacity: f32 = 1.0;
+
     // Score & Highscore RAWH
     let mut score = 0.0;
     let mut highscore = highscore::HighscoreManager::load();
 
     loop {
         let score_u32 = score as u32;
+
+        if title_screen_frame < 500 {
+            clear_background(WHITE);
+            draw_centred_text(
+                "CloudCat",
+                50.0,
+                0.0,
+                Color {
+                    r: 0.31,
+                    g: 0.31,
+                    b: 0.31,
+                    a: title_screen_opacity,
+                },
+                true,
+            );
+            draw_centred_text(
+                "Made with <3 by Akaalroop Singh (spacexplorer11 on GitHub)",
+                34.0,
+                screen_height() * 0.6,
+                Color {
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: title_screen_opacity,
+                },
+                false,
+            );
+
+            title_screen_frame += 1;
+            title_screen_opacity -= 0.0016;
+            next_frame().await;
+            continue;
+        }
 
         if !game_started {
             clear_background(WHITE);
@@ -120,13 +158,6 @@ async fn main() {
                 "Click any key, tap or click anywhere to start the game",
                 34.0,
                 screen_height() * 0.6,
-                DARKGRAY,
-                false,
-            );
-            draw_centred_text(
-                "Made with <3 by Akaalroop Singh (spacexplorer11 on GitHub)",
-                34.0,
-                screen_height() * 0.9,
                 DARKGRAY,
                 false,
             );
