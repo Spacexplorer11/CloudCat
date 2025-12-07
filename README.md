@@ -22,6 +22,10 @@ Your highscore is automatically saved/loaded.
 > Your highscore is only saved when your game is over and you've reached the game over screen
 > **NOT** when quitting at any point.
 
+>[!Tip]
+> Please provide feedback through this [simple survey](https://tally.so/r/2EXNLe) or by making an [issue](https://github.com/Spacexplorer11/CloudCat/issues/new?template=feature_request.yml)!
+> Your feedback will help shape the game and improve it!
+
 ## AI transparency
 - Minimal (5-10%) AI was used in the actual gameplay and screens.
 - **NO (0%)** AI was used in the game assets (cat, cloud, umbrella), I'm very proud of myself to have hand-drawn and hand-animated them! :) _Except the floor_
