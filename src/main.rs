@@ -102,6 +102,9 @@ async fn main() {
     };
     let mut title_cat_x = 0.0;
 
+    // let's throw in a singular settings menu to simplify my code
+    let mut settings_menu_not_active;
+
     // Score & Highscore RAWH
     let mut score = 0.0;
     let mut highscore = highscore::HighscoreManager::load();
@@ -197,40 +200,17 @@ async fn main() {
                 DARKGRAY,
                 false,
             );
-
-            draw_texture_ex(
+            (game_started, highscore) = settings::Settings::draw_settings_icon(
                 &settings,
-                screen_width() - get_responsive_size(32.0) * 2.5,
-                screen_height() - get_responsive_size(32.0) * 2.5,
-                WHITE,
-                DrawTextureParams {
-                    dest_size: Some(vec2(
-                        get_responsive_size(32.0) * 2.5,
-                        get_responsive_size(32.0) * 2.5,
-                    )),
-                    source: Some(Rect {
-                        x: 0.0,
-                        y: 0.0,
-                        w: 32.0,
-                        h: 32.0,
-                    }),
-                    ..Default::default()
-                },
-            );
-            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                if settings::Settings::is_settings_clicked() {
-                    settings::Settings::settings_menu(&settings_menu, &reset_button).await;
-                } else {
-                    game_started = true;
-                }
-            }
+                &settings_menu,
+                &reset_button,
+                highscore,
+            )
+            .await;
             next_frame().await;
             continue;
         }
         if game_over {
-            if score_u32 > highscore {
-                highscore::HighscoreManager::save(score_u32);
-            }
             clear_background(RED);
             draw_centred_text("GAME OVER", 100.0, 0.0, DARKGRAY, true);
             draw_centred_text(
@@ -270,30 +250,15 @@ async fn main() {
                 false,
             );
 
-            draw_texture_ex(
+            (settings_menu_not_active, highscore) = settings::Settings::draw_settings_icon(
                 &settings,
-                screen_width() - get_responsive_size(32.0) * 2.5,
-                screen_height() - get_responsive_size(32.0) * 2.5,
-                WHITE,
-                DrawTextureParams {
-                    dest_size: Some(vec2(
-                        get_responsive_size(32.0) * 2.5,
-                        get_responsive_size(32.0) * 2.5,
-                    )),
-                    source: Some(Rect {
-                        x: 0.0,
-                        y: 0.0,
-                        w: 32.0,
-                        h: 32.0,
-                    }),
-                    ..Default::default()
-                },
-            );
-
-            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                if settings::Settings::is_settings_clicked() {
-                    settings::Settings::settings_menu(&settings_menu, &reset_button).await;
-                } else {
+                &settings_menu,
+                &reset_button,
+                highscore,
+            )
+            .await;
+            if settings_menu_not_active {
+                if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
                     // Catty
                     cat.cat_frame = 0;
                     cat.cat_timer = 0.0;
@@ -462,6 +427,9 @@ async fn main() {
             let cat_right = cat_x + cat_width;
 
             if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
+                if score_u32 > highscore {
+                    highscore::HighscoreManager::save(score_u32);
+                }
                 game_over = true;
             }
         }

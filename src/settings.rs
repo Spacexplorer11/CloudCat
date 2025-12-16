@@ -1,4 +1,4 @@
-use crate::{draw_centred_text, get_responsive_size};
+use crate::{draw_centred_text, get_responsive_size, highscore};
 use macroquad::color::{BLACK, WHITE};
 use macroquad::input::{
     KeyCode, MouseButton, is_key_pressed, is_mouse_button_pressed, mouse_position,
@@ -29,6 +29,43 @@ impl Settings {
         false
     }
 
+    pub(crate) async fn draw_settings_icon(
+        settings_icon: &Texture2D,
+        settings_menu: &Texture2D,
+        reset_button: &Texture2D,
+        mut highscore: u32,
+    ) -> (bool, u32) {
+        draw_texture_ex(
+            &settings_icon,
+            screen_width() - get_responsive_size(32.0) * 2.5,
+            screen_height() - get_responsive_size(32.0) * 2.5,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(
+                    get_responsive_size(32.0) * 2.5,
+                    get_responsive_size(32.0) * 2.5,
+                )),
+                source: Some(Rect {
+                    x: 0.0,
+                    y: 0.0,
+                    w: 32.0,
+                    h: 32.0,
+                }),
+                ..Default::default()
+            },
+        );
+        if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
+            if Self::is_settings_clicked() {
+                highscore = Self::settings_menu(&settings_menu, &reset_button, highscore).await;
+                (false, highscore)
+            } else {
+                (true, highscore)
+            }
+        } else {
+            (false, highscore)
+        }
+    }
+
     pub(crate) fn is_settings_exit_clicked() -> bool {
         let menu_size = get_responsive_size(32.0) * 15.0;
         let menu_x = screen_width() * 0.5 - menu_size * 0.5;
@@ -51,7 +88,32 @@ impl Settings {
         false
     }
 
-    pub(crate) async fn settings_menu(settings_menu: &Texture2D, reset_button: &Texture2D) {
+    pub(crate) fn is_reset_highscore_clicked() -> bool {
+        let button_size = get_responsive_size(32.0) * 5.0;
+        let button_x = screen_width() * 0.56
+            - (get_responsive_size(32.0) * 15.0) * 0.5
+            - get_responsive_size(20.0);
+        let button_y = screen_height() * 0.67
+            - (get_responsive_size(32.0) * 15.0) * 0.5
+            - get_responsive_size(20.0);
+
+        let (mx, my) = mouse_position();
+
+        if mx >= button_x
+            && mx <= button_x + button_size
+            && my >= button_y
+            && my <= button_y + button_size
+        {
+            return true;
+        }
+        false
+    }
+
+    pub(crate) async fn settings_menu(
+        settings_menu: &Texture2D,
+        reset_button: &Texture2D,
+        mut highscore: u32,
+    ) -> u32 {
         loop {
             clear_background(WHITE);
             draw_texture_ex(
@@ -131,12 +193,15 @@ impl Settings {
             );
             if is_mouse_button_pressed(MouseButton::Left) {
                 if Self::is_settings_exit_clicked() {
-                    break;
+                    return highscore;
+                } else if Self::is_reset_highscore_clicked() {
+                    highscore::HighscoreManager::save(0);
+                    highscore = 0;
                 }
             }
 
             if is_key_pressed(KeyCode::Escape) {
-                break;
+                return highscore;
             }
             next_frame().await;
         }
