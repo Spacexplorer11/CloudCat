@@ -342,7 +342,7 @@ async fn main() {
         } else {
             draw_text(
                 &format!("Your previous highscore was {}", highscore),
-                0.0,
+                20.0,
                 110.0,
                 crate::get_responsive_size(40.0),
                 DARKGRAY,
