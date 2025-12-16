@@ -115,11 +115,13 @@ impl Settings {
         mut highscore: u32,
     ) -> u32 {
         loop {
+            let menu_x: f32 = screen_width() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5;
+            let menu_y: f32 = screen_height() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5;
             clear_background(WHITE);
             draw_texture_ex(
                 settings_menu,
-                screen_width() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5,
-                screen_height() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5,
+                menu_x,
+                menu_y,
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(
@@ -138,12 +140,8 @@ impl Settings {
 
             draw_texture_ex(
                 reset_button,
-                screen_width() * 0.56
-                    - (get_responsive_size(32.0) * 15.0) * 0.5
-                    - get_responsive_size(20.0),
-                screen_height() * 0.67 // If you're reading this, and you know the joke, it wasn't intentional but is still funny
-                    - (get_responsive_size(32.0) * 15.0) * 0.5
-                    - get_responsive_size(20.0),
+                menu_x + get_responsive_size(30.0),
+                menu_y + get_responsive_size(100.0),
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(
@@ -162,13 +160,9 @@ impl Settings {
 
             draw_text(
                 "Reset your highscore",
-                screen_width() * 0.73
-                    - (get_responsive_size(32.0) * 15.0) * 0.5
-                    - get_responsive_size(20.0),
-                screen_height() * 0.78 // If you're reading this, and you know the joke, it wasn't intentional but is still funny
-                    - (get_responsive_size(32.0) * 15.0) * 0.5
-                    - get_responsive_size(20.0),
-                20.0,
+                menu_x + get_responsive_size(30.0) + get_responsive_size(170.0),
+                menu_y + get_responsive_size(185.0),
+                get_responsive_size(25.0),
                 BLACK,
             );
 
