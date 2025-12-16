@@ -81,6 +81,9 @@ async fn main() {
     let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
 
+    let reset_button: Texture2D = load_texture("assets/reset_button.png").await.unwrap();
+    reset_button.set_filter(FilterMode::Nearest);
+
     // Game OVER RAWHHH >:)
     let mut game_over = false;
 
@@ -91,7 +94,7 @@ async fn main() {
     let mut title_screen_frame: u16 = 0;
     let mut title_screen_opacity: f32 = 1.0;
 
-    // Special extra TITLE cat object (our catty ain't an object but... yeah thats what we call the collection of variables I think... or is it Struct or idk man)
+    // Special extra TITLE cat object (our catty ain't an object but... yeah that's what we call the collection of variables I think... or is it Struct or idk man)
     let mut title_cat = Cat {
         cat_frame: 0,
         cat_timer: 0.0,
@@ -216,7 +219,7 @@ async fn main() {
             );
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
                 if settings::Settings::is_settings_clicked() {
-                    settings::Settings::settings_menu(&settings_menu).await;
+                    settings::Settings::settings_menu(&settings_menu, &reset_button).await;
                 } else {
                     game_started = true;
                 }
@@ -289,7 +292,7 @@ async fn main() {
 
             if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
                 if settings::Settings::is_settings_clicked() {
-                    settings::Settings::settings_menu(&settings_menu).await;
+                    settings::Settings::settings_menu(&settings_menu, &reset_button).await;
                 } else {
                     // Catty
                     cat.cat_frame = 0;

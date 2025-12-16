@@ -50,7 +50,7 @@ impl Settings {
         false
     }
 
-    pub(crate) async fn settings_menu(settings_menu: &Texture2D) {
+    pub(crate) async fn settings_menu(settings_menu: &Texture2D, reset_button: &Texture2D) {
         loop {
             clear_background(WHITE);
             draw_texture_ex(
@@ -73,10 +73,34 @@ impl Settings {
                 },
             );
 
+            draw_texture_ex(
+                reset_button,
+                screen_width() * 0.56
+                    - (get_responsive_size(32.0) * 15.0) * 0.5
+                    - get_responsive_size(20.0),
+                screen_height() * 0.67 // If you're reading this, and you know the joke, it wasn't intentional but is still funny
+                    - (get_responsive_size(32.0) * 15.0) * 0.5
+                    - get_responsive_size(20.0),
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 5.0,
+                        get_responsive_size(32.0) * 5.0,
+                    )),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
+
             draw_centred_text(
                 "Check out the github repo:",
                 35.0,
-                screen_height() * 0.8
+                screen_height() * 0.45
                     - (get_responsive_size(32.0) * 15.0) * 0.5
                     - get_responsive_size(20.0),
                 BLACK,
@@ -86,7 +110,7 @@ impl Settings {
             draw_centred_text(
                 "https://github.com/spacexplorer11/cloudcat",
                 23.0,
-                screen_height() * 0.85
+                screen_height() * 0.5
                     - (get_responsive_size(32.0) * 15.0) * 0.5
                     - get_responsive_size(20.0),
                 BLACK,
