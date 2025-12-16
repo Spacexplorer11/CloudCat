@@ -8,6 +8,7 @@ use macroquad::prelude::{
     DrawTextureParams, Texture2D, clear_background, draw_texture_ex, next_frame, screen_height,
     screen_width,
 };
+use macroquad::text::draw_text;
 
 pub(crate) struct Settings;
 
@@ -95,6 +96,18 @@ impl Settings {
                     }),
                     ..Default::default()
                 },
+            );
+
+            draw_text(
+                "Reset your highscore",
+                screen_width() * 0.73
+                    - (get_responsive_size(32.0) * 15.0) * 0.5
+                    - get_responsive_size(20.0),
+                screen_height() * 0.78 // If you're reading this, and you know the joke, it wasn't intentional but is still funny
+                    - (get_responsive_size(32.0) * 15.0) * 0.5
+                    - get_responsive_size(20.0),
+                20.0,
+                BLACK,
             );
 
             draw_centred_text(
