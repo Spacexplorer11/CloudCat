@@ -1,5 +1,5 @@
 use crate::{draw_centred_text, get_responsive_size};
-use macroquad::color::{BLACK, ORANGE, WHITE};
+use macroquad::color::{BLACK, WHITE};
 use macroquad::input::{
     KeyCode, MouseButton, is_key_pressed, is_mouse_button_pressed, mouse_position,
 };
@@ -71,16 +71,6 @@ impl Settings {
                     }),
                     ..Default::default()
                 },
-            );
-
-            draw_centred_text(
-                "This menu is a work in progress",
-                50.0,
-                screen_height() * 0.5
-                    - (get_responsive_size(32.0) * 15.0) * 0.5
-                    - get_responsive_size(20.0),
-                ORANGE,
-                false,
             );
 
             draw_centred_text(
