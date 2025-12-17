@@ -167,7 +167,7 @@ async fn main() {
             );
 
             title_screen_frame += 1;
-            title_screen_opacity -= 0.0016;
+            title_screen_opacity = (title_screen_opacity - 0.0016).max(0.0);
             title_cat_x += screen_width() / 500.0;
             next_frame().await;
             continue;
