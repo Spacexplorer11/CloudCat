@@ -84,6 +84,9 @@ async fn main() {
     let reset_buttons: Texture2D = load_texture("assets/reset_buttons.png").await.unwrap();
     reset_buttons.set_filter(FilterMode::Nearest);
 
+    let github_icon: Texture2D = load_texture("assets/github_icon.png").await.unwrap();
+    github_icon.set_filter(FilterMode::Linear);
+
     // Game OVER RAWHHH >:)
     let mut game_over = false;
 
@@ -200,10 +203,11 @@ async fn main() {
                 DARKGRAY,
                 false,
             );
-            (game_started, highscore) = settings::Settings::draw_settings_icon(
+            (game_started, highscore) = settings::Settings::draw_settings_and_github_icon(
                 &settings,
                 &settings_menu,
                 &reset_buttons,
+                &github_icon,
                 highscore,
             )
             .await;
@@ -250,40 +254,40 @@ async fn main() {
                 false,
             );
 
-            (settings_menu_not_active, highscore) = settings::Settings::draw_settings_icon(
-                &settings,
-                &settings_menu,
-                &reset_buttons,
-                highscore,
-            )
-            .await;
+            (settings_menu_not_active, highscore) =
+                settings::Settings::draw_settings_and_github_icon(
+                    &settings,
+                    &settings_menu,
+                    &reset_buttons,
+                    &github_icon,
+                    highscore,
+                )
+                .await;
             if settings_menu_not_active {
-                if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                    // Catty
-                    cat.cat_frame = 0;
-                    cat.cat_timer = 0.0;
-                    cat.cat_run_speed = 0.05;
+                // Catty
+                cat.cat_frame = 0;
+                cat.cat_timer = 0.0;
+                cat.cat_run_speed = 0.05;
 
-                    // Cloudy
-                    for cloud in &mut clouds {
-                        cloud.cloud_x = screen_width();
-                        cloud.cloud_frame = 0;
-                        cloud.cloud_timer = 0.0;
-                    }
-
-                    // Floorrrrrrr
-                    floor.floor_x = 0.0;
-
-                    // Umbrellaaaaaaaa
-                    umbrella.umbrella_start_time = 0.0;
-
-                    // Let's go back to the start!
-                    game_over = false;
-                    game_started = false;
-                    highscore = highscore::HighscoreManager::load();
-                    score = 0.0;
-                    continue;
+                // Cloudy
+                for cloud in &mut clouds {
+                    cloud.cloud_x = screen_width();
+                    cloud.cloud_frame = 0;
+                    cloud.cloud_timer = 0.0;
                 }
+
+                // Floorrrrrrr
+                floor.floor_x = 0.0;
+
+                // Umbrellaaaaaaaa
+                umbrella.umbrella_start_time = 0.0;
+
+                // Let's go back to the start!
+                game_over = false;
+                game_started = false;
+                highscore = highscore::HighscoreManager::load();
+                score = 0.0;
+                continue;
             }
             next_frame().await;
             continue;
