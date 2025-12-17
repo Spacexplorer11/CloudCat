@@ -204,13 +204,23 @@ impl Settings {
                 },
             );
 
-            draw_text(
-                "Reset your highscore",
-                menu_x + get_responsive_size(30.0) + get_responsive_size(170.0),
-                menu_y + get_responsive_size(185.0),
-                get_responsive_size(25.0),
-                BLACK,
-            );
+            if reset_state == 1.0 {
+                draw_text(
+                    "Click again to confirm",
+                    menu_x + get_responsive_size(30.0) + get_responsive_size(170.0),
+                    menu_y + get_responsive_size(185.0),
+                    get_responsive_size(25.0),
+                    BLACK,
+                );
+            } else {
+                draw_text(
+                    "Reset your highscore",
+                    menu_x + get_responsive_size(30.0) + get_responsive_size(170.0),
+                    menu_y + get_responsive_size(185.0),
+                    get_responsive_size(25.0),
+                    BLACK,
+                );
+            }
 
             draw_centred_text(
                 "Check out the github repo:",
