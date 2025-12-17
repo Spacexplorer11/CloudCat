@@ -99,8 +99,7 @@ impl Settings {
 
             #[cfg(not(target_arch = "wasm32"))]
             if Self::is_github_clicked() {
-                webbrowser::open("https://github.com/spacexplorer11/cloudcat")
-                    .expect("Failed to open GitHub repo link");
+                let _ = webbrowser::open("https://github.com/spacexplorer11/cloudcat");
                 return (false, highscore);
             }
 
@@ -277,8 +276,7 @@ impl Settings {
                 }
                 #[cfg(not(target_arch = "wasm32"))]
                 if Self::is_github_clicked() {
-                    webbrowser::open("https://github.com/spacexplorer11/cloudcat")
-                        .expect("Failed to open GitHub repo link");
+                    let _ = webbrowser::open("https://github.com/spacexplorer11/cloudcat");
                 }
             }
 
