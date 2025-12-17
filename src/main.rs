@@ -166,7 +166,7 @@ async fn main() {
             );
 
             title_screen_frame += 1;
-            title_screen_opacity -= 0.0016;
+            title_screen_opacity = (title_screen_opacity - 0.0016).max(0.0);
             title_cat_x += screen_width() / 500.0;
             next_frame().await;
             continue;
@@ -432,6 +432,7 @@ async fn main() {
             if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
                 if score_u32 > highscore {
                     highscore::HighscoreManager::save(score_u32);
+                    highscore = score_u32;
                 }
                 game_over = true;
             }
