@@ -81,8 +81,8 @@ async fn main() {
     let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
 
-    let reset_button: Texture2D = load_texture("assets/reset_buttons.png").await.unwrap();
-    reset_button.set_filter(FilterMode::Nearest);
+    let reset_buttons: Texture2D = load_texture("assets/reset_buttons.png").await.unwrap();
+    reset_buttons.set_filter(FilterMode::Nearest);
 
     // Game OVER RAWHHH >:)
     let mut game_over = false;
@@ -203,7 +203,7 @@ async fn main() {
             (game_started, highscore) = settings::Settings::draw_settings_icon(
                 &settings,
                 &settings_menu,
-                &reset_button,
+                &reset_buttons,
                 highscore,
             )
             .await;
@@ -253,7 +253,7 @@ async fn main() {
             (settings_menu_not_active, highscore) = settings::Settings::draw_settings_icon(
                 &settings,
                 &settings_menu,
-                &reset_button,
+                &reset_buttons,
                 highscore,
             )
             .await;
