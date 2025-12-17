@@ -34,8 +34,9 @@ Run `cargo run`
 ### WASM Version (Web)
 _You must delete the web (if it exists) directory before running this_  
 **You will also need python for the http server, if you can't get it, you can create one yourself using a different method**  
+**This will only work on bash or zsh, it may not work on Windows**  
 Run 
-```
+```bash
 cargo build --target wasm32-unknown-unknown --release
 mkdir -p web
 cp target/wasm32-unknown-unknown/release/cloudcat.wasm web/

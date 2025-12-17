@@ -72,7 +72,7 @@ impl Settings {
         );
 
         draw_texture_ex(
-            &settings_icon,
+            settings_icon,
             screen_width() - get_responsive_size(32.0) * 2.5,
             screen_height() - get_responsive_size(32.0) * 2.5,
             WHITE,
@@ -206,6 +206,14 @@ impl Settings {
             if reset_state == 1.0 {
                 draw_text(
                     "Click again to confirm",
+                    menu_x + get_responsive_size(30.0) + get_responsive_size(170.0),
+                    menu_y + get_responsive_size(185.0),
+                    get_responsive_size(25.0),
+                    BLACK,
+                );
+            } else if reset_state == 2.0 {
+                draw_text(
+                    "Highscore was reset",
                     menu_x + get_responsive_size(30.0) + get_responsive_size(170.0),
                     menu_y + get_responsive_size(185.0),
                     get_responsive_size(25.0),

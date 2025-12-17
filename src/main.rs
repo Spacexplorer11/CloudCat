@@ -8,7 +8,6 @@ mod entities {
     pub mod umbrella;
 }
 
-use crate::Color;
 use crate::entities::cloud;
 use crate::entities::floor;
 use crate::entities::umbrella;
