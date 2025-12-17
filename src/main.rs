@@ -433,6 +433,7 @@ async fn main() {
             if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
                 if score_u32 > highscore {
                     highscore::HighscoreManager::save(score_u32);
+                    highscore = score_u32;
                 }
                 game_over = true;
             }
