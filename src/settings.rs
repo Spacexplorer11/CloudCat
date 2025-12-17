@@ -50,12 +50,12 @@ impl Settings {
         settings_icon: &Texture2D,
         settings_menu: &Texture2D,
         reset_button: &Texture2D,
-        github_icon: &Texture2D,
+        _github_icon: &Texture2D,
         mut highscore: u32,
     ) -> (bool, u32) {
         #[cfg(not(target_arch = "wasm32"))]
         draw_texture_ex(
-            &github_icon,
+            _github_icon,
             get_responsive_size(32.0),
             screen_height() - get_responsive_size(32.0) * 1.5,
             WHITE,
@@ -93,7 +93,7 @@ impl Settings {
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
             if Self::is_settings_clicked() {
                 highscore =
-                    Self::settings_menu(settings_menu, reset_button, github_icon, highscore).await;
+                    Self::settings_menu(settings_menu, reset_button, _github_icon, highscore).await;
                 return (false, highscore);
             }
 
@@ -156,7 +156,7 @@ impl Settings {
     pub(crate) async fn settings_menu(
         settings_menu: &Texture2D,
         reset_button: &Texture2D,
-        github_icon: &Texture2D,
+        _github_icon: &Texture2D,
         mut highscore: u32,
     ) -> u32 {
         let mut reset_state: f32 = 0.0;
@@ -234,7 +234,7 @@ impl Settings {
 
             #[cfg(not(target_arch = "wasm32"))]
             draw_texture_ex(
-                github_icon,
+                _github_icon,
                 get_responsive_size(32.0),
                 screen_height() - get_responsive_size(32.0) * 1.5,
                 WHITE,
