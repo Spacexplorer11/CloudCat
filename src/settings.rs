@@ -222,7 +222,7 @@ impl Settings {
             }
 
             draw_centred_text(
-                "Check out the github repo:",
+                "Check out the GitHub repo:",
                 35.0,
                 screen_height() * 0.45
                     - (get_responsive_size(32.0) * 15.0) * 0.5
