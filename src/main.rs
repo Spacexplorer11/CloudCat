@@ -81,7 +81,7 @@ async fn main() {
     let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
 
-    let reset_button: Texture2D = load_texture("assets/reset_button.png").await.unwrap();
+    let reset_button: Texture2D = load_texture("assets/reset_buttons.png").await.unwrap();
     reset_button.set_filter(FilterMode::Nearest);
 
     // Game OVER RAWHHH >:)

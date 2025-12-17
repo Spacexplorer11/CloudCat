@@ -114,6 +114,7 @@ impl Settings {
         reset_button: &Texture2D,
         mut highscore: u32,
     ) -> u32 {
+        let mut reset_state: f32 = 0.0;
         loop {
             let menu_x: f32 = screen_width() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5;
             let menu_y: f32 = screen_height() * 0.5 - (get_responsive_size(32.0) * 15.0) * 0.5;
@@ -149,7 +150,7 @@ impl Settings {
                         get_responsive_size(32.0) * 5.0,
                     )),
                     source: Some(Rect {
-                        x: 0.0,
+                        x: 32.0 * reset_state,
                         y: 0.0,
                         w: 32.0,
                         h: 32.0,
@@ -189,8 +190,15 @@ impl Settings {
                 if Self::is_settings_exit_clicked() {
                     return highscore;
                 } else if Self::is_reset_highscore_clicked() {
-                    highscore::HighscoreManager::save(0);
-                    highscore = 0;
+                    match reset_state {
+                        0.0 => reset_state = 1.0,
+                        1.0 => {
+                            highscore::HighscoreManager::save(0);
+                            highscore = 0;
+                            reset_state = 2.0;
+                        }
+                        _ => {}
+                    }
                 }
             }
 
