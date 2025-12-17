@@ -26,12 +26,15 @@ impl Cat {
                     get_responsive_size(frame_width) * 5.0,
                     get_responsive_size(frame_height) * 5.0,
                 )),
-                source: Some(Rect {
-                    x: frame_width * self.cat_frame as f32,
-                    y: 0.0,
-                    w: frame_width,
-                    h: frame_height,
-                }),
+                source: {
+                    let inset = 0.5;
+                    Some(Rect {
+                        x: frame_width * self.cat_frame as f32 + inset,
+                        y: 0.0 + inset,
+                        w: frame_width - inset * 2.0,
+                        h: frame_height - inset * 2.0,
+                    })
+                },
                 ..Default::default()
             },
         );
