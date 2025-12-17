@@ -265,6 +265,11 @@ impl Settings {
                         _ => {}
                     }
                 }
+                #[cfg(not(target_arch = "wasm32"))]
+                if Self::is_github_clicked() {
+                    webbrowser::open("https://github.com/spacexplorer11/cloudcat")
+                        .expect("Failed to open GitHub repo link");
+                }
             }
 
             if is_key_pressed(KeyCode::Escape) {

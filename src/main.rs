@@ -105,7 +105,7 @@ async fn main() {
     };
     let mut title_cat_x = 0.0;
 
-    // let's throw in a singular settings menu to simplify my code
+    // let's throw in a singular settings menu variable to simplify my code
     let mut settings_menu_not_active;
 
     // Score & Highscore RAWH
