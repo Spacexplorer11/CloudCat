@@ -8,11 +8,11 @@ mod entities {
     pub mod umbrella;
 }
 
-use crate::entities::cat;
 use crate::entities::cloud;
 use crate::entities::floor;
 use crate::entities::umbrella;
 
+use crate::entities::cat::Cat;
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
@@ -44,7 +44,7 @@ async fn main() {
     let cat_texture = load_texture("assets/cat.png").await.unwrap();
     cat_texture.set_filter(FilterMode::Nearest);
 
-    let mut cat = cat::Cat {
+    let mut cat = Cat {
         cat_frame: 0,
         cat_timer: 0.0,
         cat_run_speed: 0.05,
@@ -80,11 +80,32 @@ async fn main() {
     let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
 
+    let reset_buttons: Texture2D = load_texture("assets/reset_buttons.png").await.unwrap();
+    reset_buttons.set_filter(FilterMode::Nearest);
+
+    let github_icon: Texture2D = load_texture("assets/github_icon.png").await.unwrap();
+    github_icon.set_filter(FilterMode::Linear);
+
     // Game OVER RAWHHH >:)
     let mut game_over = false;
 
     // Has da game started?? mrow :3
     let mut game_started = false;
+
+    // Some lil title screen variables ~ idk what else to say bro
+    let mut title_screen_frame: u16 = 0;
+    let mut title_screen_opacity: f32 = 1.0;
+
+    // Special extra TITLE cat object (our catty ain't an object but... yeah that's what we call the collection of variables I think... or is it Struct or idk man)
+    let mut title_cat = Cat {
+        cat_frame: 0,
+        cat_timer: 0.0,
+        cat_run_speed: 0.05,
+    };
+    let mut title_cat_x = 0.0;
+
+    // let's throw in a singular settings menu variable to simplify my code
+    let mut settings_menu_not_active;
 
     // Score & Highscore RAWH
     let mut score = 0.0;
@@ -92,6 +113,64 @@ async fn main() {
 
     loop {
         let score_u32 = score as u32;
+
+        if title_screen_frame < 500 {
+            clear_background(WHITE);
+            draw_texture_ex(
+                &cat_texture,
+                title_cat_x,
+                screen_height() * 0.2,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(
+                        get_responsive_size(32.0) * 5.0,
+                        get_responsive_size(32.0) * 5.0,
+                    )),
+                    source: Some(Rect {
+                        x: 32.0 * title_cat.cat_frame as f32,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
+            title_cat.cat_timer += get_frame_time();
+            if title_cat.cat_timer > title_cat.cat_run_speed {
+                title_cat.cat_timer = 0.0;
+                title_cat.cat_frame = (title_cat.cat_frame + 1) % 3;
+            }
+            draw_centred_text(
+                "CloudCat",
+                50.0,
+                0.0,
+                Color {
+                    r: 0.31,
+                    g: 0.31,
+                    b: 0.31,
+                    a: title_screen_opacity,
+                },
+                true,
+            );
+            draw_centred_text(
+                "Made with <3 by Akaalroop Singh (spacexplorer11 on GitHub)",
+                34.0,
+                screen_height() * 0.6,
+                Color {
+                    r: 0.0,
+                    g: 0.0,
+                    b: 0.0,
+                    a: title_screen_opacity,
+                },
+                false,
+            );
+
+            title_screen_frame += 1;
+            title_screen_opacity = (title_screen_opacity - 0.0016).max(0.0);
+            title_cat_x += screen_width() / 500.0;
+            next_frame().await;
+            continue;
+        }
 
         if !game_started {
             clear_background(WHITE);
@@ -123,47 +202,18 @@ async fn main() {
                 DARKGRAY,
                 false,
             );
-            draw_centred_text(
-                "Made with <3 by Akaalroop Singh (spacexplorer11 on GitHub)",
-                34.0,
-                screen_height() * 0.9,
-                DARKGRAY,
-                false,
-            );
-
-            draw_texture_ex(
+            (game_started, highscore) = settings::Settings::draw_settings_and_github_icon(
                 &settings,
-                screen_width() - get_responsive_size(32.0) * 2.5,
-                screen_height() - get_responsive_size(32.0) * 2.5,
-                WHITE,
-                DrawTextureParams {
-                    dest_size: Some(vec2(
-                        get_responsive_size(32.0) * 2.5,
-                        get_responsive_size(32.0) * 2.5,
-                    )),
-                    source: Some(Rect {
-                        x: 0.0,
-                        y: 0.0,
-                        w: 32.0,
-                        h: 32.0,
-                    }),
-                    ..Default::default()
-                },
-            );
-            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                if settings::Settings::is_settings_clicked() {
-                    settings::Settings::settings_menu(&settings_menu).await;
-                } else {
-                    game_started = true;
-                }
-            }
+                &settings_menu,
+                &reset_buttons,
+                &github_icon,
+                highscore,
+            )
+            .await;
             next_frame().await;
             continue;
         }
         if game_over {
-            if score_u32 > highscore {
-                highscore::HighscoreManager::save(score_u32);
-            }
             clear_background(RED);
             draw_centred_text("GAME OVER", 100.0, 0.0, DARKGRAY, true);
             draw_centred_text(
@@ -203,55 +253,40 @@ async fn main() {
                 false,
             );
 
-            draw_texture_ex(
-                &settings,
-                screen_width() - get_responsive_size(32.0) * 2.5,
-                screen_height() - get_responsive_size(32.0) * 2.5,
-                WHITE,
-                DrawTextureParams {
-                    dest_size: Some(vec2(
-                        get_responsive_size(32.0) * 2.5,
-                        get_responsive_size(32.0) * 2.5,
-                    )),
-                    source: Some(Rect {
-                        x: 0.0,
-                        y: 0.0,
-                        w: 32.0,
-                        h: 32.0,
-                    }),
-                    ..Default::default()
-                },
-            );
+            (settings_menu_not_active, highscore) =
+                settings::Settings::draw_settings_and_github_icon(
+                    &settings,
+                    &settings_menu,
+                    &reset_buttons,
+                    &github_icon,
+                    highscore,
+                )
+                .await;
+            if settings_menu_not_active {
+                // Catty
+                cat.cat_frame = 0;
+                cat.cat_timer = 0.0;
+                cat.cat_run_speed = 0.05;
 
-            if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-                if settings::Settings::is_settings_clicked() {
-                    settings::Settings::settings_menu(&settings_menu).await;
-                } else {
-                    // Catty
-                    cat.cat_frame = 0;
-                    cat.cat_timer = 0.0;
-                    cat.cat_run_speed = 0.05;
-
-                    // Cloudy
-                    for cloud in &mut clouds {
-                        cloud.cloud_x = screen_width();
-                        cloud.cloud_frame = 0;
-                        cloud.cloud_timer = 0.0;
-                    }
-
-                    // Floorrrrrrr
-                    floor.floor_x = 0.0;
-
-                    // Umbrellaaaaaaaa
-                    umbrella.umbrella_start_time = 0.0;
-
-                    // Let's go back to the start!
-                    game_over = false;
-                    game_started = false;
-                    highscore = highscore::HighscoreManager::load();
-                    score = 0.0;
-                    continue;
+                // Cloudy
+                for cloud in &mut clouds {
+                    cloud.cloud_x = screen_width();
+                    cloud.cloud_frame = 0;
+                    cloud.cloud_timer = 0.0;
                 }
+
+                // Floorrrrrrr
+                floor.floor_x = 0.0;
+
+                // Umbrellaaaaaaaa
+                umbrella.umbrella_start_time = 0.0;
+
+                // Let's go back to the start!
+                game_over = false;
+                game_started = false;
+                highscore = highscore::HighscoreManager::load();
+                score = 0.0;
+                continue;
             }
             next_frame().await;
             continue;
@@ -310,7 +345,7 @@ async fn main() {
         } else {
             draw_text(
                 &format!("Your previous highscore was {}", highscore),
-                0.0,
+                20.0,
                 110.0,
                 crate::get_responsive_size(40.0),
                 DARKGRAY,
@@ -395,6 +430,10 @@ async fn main() {
             let cat_right = cat_x + cat_width;
 
             if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
+                if score_u32 > highscore {
+                    highscore::HighscoreManager::save(score_u32);
+                    highscore = score_u32;
+                }
                 game_over = true;
             }
         }
