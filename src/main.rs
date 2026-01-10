@@ -47,11 +47,11 @@ fn get_dir_path() -> String {
 
         let exe_path = match exe_path.to_str() {
             Some(path) => {
-                println!("The current directory path is {}", path);
+                println!("The executable path is {}", path);
                 path
             }
             _ => {
-                eprintln!("The directory path couldn't be converted to a string");
+                eprintln!("The executable path couldn't be converted to a string");
                 ""
             }
         };
