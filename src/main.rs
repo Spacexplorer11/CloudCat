@@ -8,11 +8,11 @@ mod entities {
     pub mod umbrella;
 }
 
-use crate::entities::cloud;
-use crate::entities::floor;
-use crate::entities::umbrella;
-
 use crate::entities::cat::Cat;
+use crate::entities::cloud::Cloud;
+use crate::entities::floor::Floor;
+use crate::entities::umbrella::Umbrella;
+
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
@@ -53,7 +53,7 @@ async fn main() {
     let cloud_texture: Texture2D = load_texture("assets/cloud.png").await.unwrap();
     cloud_texture.set_filter(FilterMode::Nearest);
 
-    let mut clouds: Vec<cloud::Cloud> = vec![cloud::Cloud {
+    let mut clouds: Vec<Cloud> = vec![Cloud {
         cloud_x: screen_width(),
         cloud_frame: 0,
         cloud_timer: 0.0,
@@ -65,12 +65,12 @@ async fn main() {
     let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
 
-    let mut floor = floor::Floor { floor_x: 0.0 };
+    let mut floor = Floor { floor_x: 0.0 };
 
     let umbrella_texture: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
     umbrella_texture.set_filter(FilterMode::Nearest);
 
-    let mut umbrella = umbrella::Umbrella {
+    let mut umbrella = Umbrella {
         umbrella_start_time: 0.0,
     };
 
@@ -460,7 +460,7 @@ async fn main() {
                 }
             }
             if !too_close_cloud {
-                clouds.push(cloud::Cloud {
+                clouds.push(Cloud {
                     cloud_x: new_cloud_x,
                     cloud_frame: 0,
                     cloud_timer: 0.0,
