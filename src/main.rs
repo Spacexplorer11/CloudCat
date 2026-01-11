@@ -17,7 +17,7 @@ use crate::entities::umbrella::Umbrella;
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 pub(crate) fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
@@ -38,35 +38,18 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
     draw_text(text, x, y, font_size, colour);
 }
 
-fn get_dir_path() -> String {
+fn get_asset_path(asset: &str) -> String {
     if cfg!(not(debug_assertions)) {
-        let exe_path = env::current_exe().unwrap_or_else(|e| {
-            eprintln!("Failed to get current executable path: {e}");
-            PathBuf::new()
-        });
+        let exe_path = env::current_exe()
+            .unwrap_or_else(|e| panic!("Failed to get current executable path: {e}"));
 
-        let exe_path = match exe_path.to_str() {
-            Some(path) => {
-                println!("The executable path is {}", path);
-                path
-            }
-            _ => {
-                eprintln!("The executable path couldn't be converted to a string");
-                ""
-            }
-        };
+        let mut exe_path = Path::parent(&*exe_path).unwrap().to_path_buf();
 
-        let exe_path = Path::parent(exe_path.as_ref());
-
-        match exe_path {
-            Some(path) => match path.to_str() {
-                Some(str) => String::from(str.to_owned() + "/"),
-                _ => String::new(),
-            },
-            _ => String::new(),
-        }
+        exe_path.push("assets");
+        exe_path.push(asset);
+        exe_path.to_str().unwrap().parse().unwrap()
     } else {
-        String::new()
+        format!("/assets/{asset}")
     }
 }
 
@@ -75,7 +58,7 @@ async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     let mut rng = rng();
 
-    let cat_texture: Texture2D = load_texture(&*(get_dir_path() + "assets/cat.png"))
+    let cat_texture: Texture2D = load_texture(get_asset_path("cat.png").as_str())
         .await
         .unwrap();
     cat_texture.set_filter(FilterMode::Nearest);
@@ -86,7 +69,7 @@ async fn main() {
         cat_run_speed: 0.05,
     };
 
-    let cloud_texture: Texture2D = load_texture(&*(get_dir_path() + "assets/cloud.png"))
+    let cloud_texture: Texture2D = load_texture(get_asset_path("cloud.png").as_str())
         .await
         .unwrap();
     cloud_texture.set_filter(FilterMode::Nearest);
@@ -100,14 +83,14 @@ async fn main() {
     // Which clouds must be incinerated :(
     let mut clouds_to_die: Vec<usize> = vec![];
 
-    let floor_texture: Texture2D = load_texture(&*(get_dir_path() + "assets/floor.png"))
+    let floor_texture: Texture2D = load_texture(get_asset_path("floor.png").as_str())
         .await
         .unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
 
     let mut floor = Floor { floor_x: 0.0 };
 
-    let umbrella_texture: Texture2D = load_texture(&*(get_dir_path() + "assets/umbrella.png"))
+    let umbrella_texture: Texture2D = load_texture(get_asset_path("umbrella.png").as_str())
         .await
         .unwrap();
     umbrella_texture.set_filter(FilterMode::Nearest);
@@ -116,22 +99,22 @@ async fn main() {
         umbrella_start_time: 0.0,
     };
 
-    let settings: Texture2D = load_texture(&*(get_dir_path() + "assets/settings.png"))
+    let settings: Texture2D = load_texture(get_asset_path("settings.png").as_str())
         .await
         .unwrap();
     settings.set_filter(FilterMode::Linear);
 
-    let settings_menu: Texture2D = load_texture(&*(get_dir_path() + "assets/settings-menu.png"))
+    let settings_menu: Texture2D = load_texture(get_asset_path("settings-menu.png").as_str())
         .await
         .unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
 
-    let reset_buttons: Texture2D = load_texture(&*(get_dir_path() + "assets/reset_buttons.png"))
+    let reset_buttons: Texture2D = load_texture(get_asset_path("reset_buttons.png").as_str())
         .await
         .unwrap();
     reset_buttons.set_filter(FilterMode::Nearest);
 
-    let github_icon: Texture2D = load_texture(&*(get_dir_path() + "assets/github_icon.png"))
+    let github_icon: Texture2D = load_texture(get_asset_path("github_icon.png").as_str())
         .await
         .unwrap();
     github_icon.set_filter(FilterMode::Linear);
