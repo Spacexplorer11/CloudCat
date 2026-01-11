@@ -16,6 +16,7 @@ use crate::entities::umbrella::Umbrella;
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
+use std::env;
 
 pub(crate) fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
@@ -36,12 +37,36 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
     draw_text(text, x, y, font_size, colour);
 }
 
+fn get_asset_path(asset: &str) -> String {
+    if cfg!(debug_assertions) {
+        format!("assets/{}", asset)
+    } else {
+        let exe_path = env::current_exe()
+            .unwrap_or_else(|e| panic!("Failed to get current executable path: {}", e));
+
+        let exe_dir = exe_path
+            .parent()
+            .unwrap_or_else(|| panic!("Failed to get executable directory"));
+
+        let mut asset_path = exe_dir.to_path_buf();
+        asset_path.push("assets");
+        asset_path.push(asset);
+
+        asset_path
+            .to_str()
+            .unwrap_or_else(|| panic!("Failed to convert path to string"))
+            .to_string()
+    }
+}
+
 #[macroquad::main("CloudCat")]
 async fn main() {
     #[cfg(not(target_arch = "wasm32"))]
     let mut rng = rng();
 
-    let cat_texture = load_texture("assets/cat.png").await.unwrap();
+    let cat_texture: Texture2D = load_texture(get_asset_path("cat.png").as_str())
+        .await
+        .unwrap();
     cat_texture.set_filter(FilterMode::Nearest);
 
     let mut cat = Cat {
@@ -50,7 +75,9 @@ async fn main() {
         cat_run_speed: 0.05,
     };
 
-    let cloud_texture: Texture2D = load_texture("assets/cloud.png").await.unwrap();
+    let cloud_texture: Texture2D = load_texture(get_asset_path("cloud.png").as_str())
+        .await
+        .unwrap();
     cloud_texture.set_filter(FilterMode::Nearest);
 
     let mut clouds: Vec<Cloud> = vec![Cloud {
@@ -62,28 +89,40 @@ async fn main() {
     // Which clouds must be incinerated :(
     let mut clouds_to_die: Vec<usize> = vec![];
 
-    let floor_texture: Texture2D = load_texture("assets/floor.png").await.unwrap();
+    let floor_texture: Texture2D = load_texture(get_asset_path("floor.png").as_str())
+        .await
+        .unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
 
     let mut floor = Floor { floor_x: 0.0 };
 
-    let umbrella_texture: Texture2D = load_texture("assets/umbrella.png").await.unwrap();
+    let umbrella_texture: Texture2D = load_texture(get_asset_path("umbrella.png").as_str())
+        .await
+        .unwrap();
     umbrella_texture.set_filter(FilterMode::Nearest);
 
     let mut umbrella = Umbrella {
         umbrella_start_time: 0.0,
     };
 
-    let settings: Texture2D = load_texture("assets/settings.png").await.unwrap();
+    let settings: Texture2D = load_texture(get_asset_path("settings.png").as_str())
+        .await
+        .unwrap();
     settings.set_filter(FilterMode::Linear);
 
-    let settings_menu: Texture2D = load_texture("assets/settings-menu.png").await.unwrap();
+    let settings_menu: Texture2D = load_texture(get_asset_path("settings-menu.png").as_str())
+        .await
+        .unwrap();
     settings_menu.set_filter(FilterMode::Nearest);
 
-    let reset_buttons: Texture2D = load_texture("assets/reset_buttons.png").await.unwrap();
+    let reset_buttons: Texture2D = load_texture(get_asset_path("reset_buttons.png").as_str())
+        .await
+        .unwrap();
     reset_buttons.set_filter(FilterMode::Nearest);
 
-    let github_icon: Texture2D = load_texture("assets/github_icon.png").await.unwrap();
+    let github_icon: Texture2D = load_texture(get_asset_path("github_icon.png").as_str())
+        .await
+        .unwrap();
     github_icon.set_filter(FilterMode::Linear);
 
     // Game OVER RAWHHH >:)
@@ -339,7 +378,7 @@ async fn main() {
                 &format!("Your highscore is {}", highscore),
                 screen_width() * 0.01,
                 110.0,
-                crate::get_responsive_size(50.0),
+                get_responsive_size(50.0),
                 DARKGRAY,
             );
         } else {
@@ -347,7 +386,7 @@ async fn main() {
                 &format!("Your previous highscore was {}", highscore),
                 20.0,
                 110.0,
-                crate::get_responsive_size(40.0),
+                get_responsive_size(40.0),
                 DARKGRAY,
             );
         }
