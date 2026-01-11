@@ -1,4 +1,5 @@
 # Cloud Cat
+![Hackatime badge](https://hackatime-badge.hackclub.com/U08D22QNUVD/CloudCat)
 
 ## What is CloudCat?
 
@@ -25,6 +26,11 @@ Your highscore is automatically saved/loaded.
 >[!Tip]
 > Please provide feedback through this [simple survey](https://tally.so/r/2EXNLe) or by making an [issue](https://github.com/Spacexplorer11/CloudCat/issues/new?template=feature_request.yml)!
 > Your feedback will help shape the game and improve it!
+
+## Memory usage
+Tested on a MacBook Air M1 2020 during the main play section of the game. I used the v1.3.1 macos-arm-64 build.  
+I got a result of 61.8 MB.  
+<img width="1036" height="121" alt="SCR-20260111-jwmp" src="https://github.com/user-attachments/assets/77422f05-c771-457a-831a-6ed1dc9ac098" />
 
 ## How to run locally (dev version)
 **You must be in the correct directory (root of the project) to run these commands**
