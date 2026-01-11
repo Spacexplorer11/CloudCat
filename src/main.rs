@@ -17,7 +17,7 @@ use crate::entities::umbrella::Umbrella;
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub(crate) fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
@@ -56,8 +56,13 @@ fn get_dir_path() -> String {
             }
         };
 
-        match String::from(exe_path).strip_suffix("cloudcat") {
-            Some(path) => String::from(path),
+        let exe_path = Path::parent(exe_path.as_ref());
+
+        match exe_path {
+            Some(path) => match path.to_str() {
+                Some(str) => String::from(str.to_owned() + "/"),
+                _ => String::new(),
+            },
             _ => String::new(),
         }
     } else {
