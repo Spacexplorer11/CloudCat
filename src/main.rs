@@ -73,6 +73,7 @@ async fn main() {
         cat_frame: 0,
         cat_timer: 0.0,
         cat_run_speed: 0.05,
+        cat_texture: &cat_texture,
     };
 
     let cloud_texture: Texture2D = load_texture(get_asset_path("cloud.png").as_str())
@@ -84,6 +85,7 @@ async fn main() {
         cloud_x: screen_width(),
         cloud_frame: 0,
         cloud_timer: 0.0,
+        cloud_texture: &cloud_texture,
     }];
 
     // Which clouds must be incinerated :(
@@ -94,7 +96,10 @@ async fn main() {
         .unwrap();
     floor_texture.set_filter(FilterMode::Nearest);
 
-    let mut floor = Floor { floor_x: 0.0 };
+    let mut floor = Floor {
+        floor_x: 0.0,
+        floor_texture,
+    };
 
     let umbrella_texture: Texture2D = load_texture(get_asset_path("umbrella.png").as_str())
         .await
@@ -103,6 +108,7 @@ async fn main() {
 
     let mut umbrella = Umbrella {
         umbrella_start_time: 0.0,
+        umbrella_texture,
     };
 
     let settings: Texture2D = load_texture(get_asset_path("settings.png").as_str())
@@ -140,6 +146,7 @@ async fn main() {
         cat_frame: 0,
         cat_timer: 0.0,
         cat_run_speed: 0.05,
+        cat_texture: &cat_texture,
     };
     let mut title_cat_x = 0.0;
 
@@ -441,18 +448,18 @@ async fn main() {
         clouds_to_die.clear();
 
         for cloud in &mut clouds {
-            (cloud.cloud_timer, cloud.cloud_frame) = cloud.draw_cloud(&cloud_texture).await;
+            (cloud.cloud_timer, cloud.cloud_frame) = cloud.draw_cloud().await;
         }
 
         let umbrella_up = umbrella.umbrella_start_time != 0.0
             && (get_time() - umbrella.umbrella_start_time) < 3.0;
         if umbrella_up {
-            umbrella.draw_umbrella(&umbrella_texture).await;
+            umbrella.draw_umbrella().await;
         }
 
-        (cat.cat_timer, cat.cat_frame) = cat.draw_cat(&cat_texture).await;
+        (cat.cat_timer, cat.cat_frame) = cat.draw_cat().await;
 
-        floor.draw_floor(&floor_texture).await;
+        floor.draw_floor().await;
 
         floor.floor_x -= scroll_speed * dt;
         if floor.floor_x <= -screen_width() {
@@ -503,6 +510,7 @@ async fn main() {
                     cloud_x: new_cloud_x,
                     cloud_frame: 0,
                     cloud_timer: 0.0,
+                    cloud_texture: &cloud_texture,
                 });
             }
         }

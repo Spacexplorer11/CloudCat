@@ -5,19 +5,20 @@ use macroquad::prelude::{
     DrawTextureParams, Texture2D, draw_texture_ex, get_frame_time, screen_height,
 };
 
-pub(crate) struct Cat {
+pub(crate) struct Cat<'a> {
     // Catty variables :3
     pub(crate) cat_frame: i32,
     pub(crate) cat_timer: f32,
     pub(crate) cat_run_speed: f32,
+    pub(crate) cat_texture: &'a Texture2D,
 }
 
-impl Cat {
-    pub(crate) async fn draw_cat(&mut self, cat: &Texture2D) -> (f32, i32) {
+impl Cat<'_> {
+    pub(crate) async fn draw_cat(&mut self) -> (f32, i32) {
         let frame_width = 32.0;
         let frame_height = 32.0;
         draw_texture_ex(
-            &cat,
+            self.cat_texture,
             100.0,
             screen_height() - 26.0 - get_responsive_size(frame_height) * 5.0,
             WHITE,

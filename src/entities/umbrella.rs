@@ -6,15 +6,16 @@ use macroquad::prelude::{DrawTextureParams, Texture2D, draw_texture_ex, screen_h
 pub(crate) struct Umbrella {
     // Umbrella variable reminds me of Squid Games...
     pub(crate) umbrella_start_time: f64,
+    pub(crate) umbrella_texture: Texture2D,
 }
 
 impl Umbrella {
-    pub(crate) async fn draw_umbrella(&self, umbrella: &Texture2D) {
+    pub(crate) async fn draw_umbrella(&self) {
         let umbrella_width = 32.0;
         let umbrella_height = 32.0;
 
         draw_texture_ex(
-            &umbrella,
+            &self.umbrella_texture,
             100.0,
             screen_height() - 20.0 - get_responsive_size(umbrella_height) * 8.0,
             WHITE,
