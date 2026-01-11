@@ -7,10 +7,10 @@ use macroquad::prelude::{
 
 pub(crate) struct Cloud<'a> {
     // Cloud variables ☁
-    pub(crate) cloud_frame: i32,
-    pub(crate) cloud_timer: f32,
-    pub(crate) cloud_x: f32,
-    pub(crate) cloud_texture: &'a Texture2D,
+    pub(crate) frame: i32,
+    pub(crate) timer: f32,
+    pub(crate) x: f32,
+    pub(crate) texture: &'a Texture2D,
 }
 
 impl Cloud<'_> {
@@ -19,8 +19,8 @@ impl Cloud<'_> {
         let frame_width = 32.0;
         let frame_height = 32.0;
         draw_texture_ex(
-            self.cloud_texture,
-            self.cloud_x,
+            self.texture,
+            self.x,
             screen_height()
                 - 30.0
                 - get_responsive_size(frame_height) * 7.0
@@ -32,7 +32,7 @@ impl Cloud<'_> {
                     get_responsive_size(frame_height) * 7.0,
                 )),
                 source: Some(Rect {
-                    x: frame_width * self.cloud_frame as f32,
+                    x: frame_width * self.frame as f32,
                     y: 0.0,
                     w: frame_width,
                     h: frame_height,
@@ -41,11 +41,11 @@ impl Cloud<'_> {
             },
         );
 
-        self.cloud_timer += get_frame_time();
-        if self.cloud_timer > fps {
-            self.cloud_timer = 0.0;
-            self.cloud_frame = (self.cloud_frame + 1) % 7;
+        self.timer += get_frame_time();
+        if self.timer > fps {
+            self.timer = 0.0;
+            self.frame = (self.frame + 1) % 7;
         }
-        (self.cloud_timer, self.cloud_frame)
+        (self.timer, self.frame)
     }
 }

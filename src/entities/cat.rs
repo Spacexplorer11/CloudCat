@@ -7,10 +7,10 @@ use macroquad::prelude::{
 
 pub(crate) struct Cat<'a> {
     // Catty variables :3
-    pub(crate) cat_frame: i32,
-    pub(crate) cat_timer: f32,
-    pub(crate) cat_run_speed: f32,
-    pub(crate) cat_texture: &'a Texture2D,
+    pub(crate) frame: i32,
+    pub(crate) timer: f32,
+    pub(crate) run_speed: f32,
+    pub(crate) texture: &'a Texture2D,
 }
 
 impl Cat<'_> {
@@ -18,7 +18,7 @@ impl Cat<'_> {
         let frame_width = 32.0;
         let frame_height = 32.0;
         draw_texture_ex(
-            self.cat_texture,
+            self.texture,
             100.0,
             screen_height() - 26.0 - get_responsive_size(frame_height) * 5.0,
             WHITE,
@@ -30,7 +30,7 @@ impl Cat<'_> {
                 source: {
                     let inset = 0.5;
                     Some(Rect {
-                        x: frame_width * self.cat_frame as f32 + inset,
+                        x: frame_width * self.frame as f32 + inset,
                         y: 0.0 + inset,
                         w: frame_width - inset * 2.0,
                         h: frame_height - inset * 2.0,
@@ -40,11 +40,11 @@ impl Cat<'_> {
             },
         );
 
-        self.cat_timer += get_frame_time();
-        if self.cat_timer > self.cat_run_speed {
-            self.cat_timer = 0.0;
-            self.cat_frame = (self.cat_frame + 1) % 3;
+        self.timer += get_frame_time();
+        if self.timer > self.run_speed {
+            self.timer = 0.0;
+            self.frame = (self.frame + 1) % 3;
         }
-        (self.cat_timer, self.cat_frame)
+        (self.timer, self.frame)
     }
 }

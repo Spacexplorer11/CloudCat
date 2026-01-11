@@ -5,24 +5,24 @@ use macroquad::prelude::{
 };
 
 pub(crate) struct Floor {
-    // Floor variable still :(
-    pub(crate) floor_x: f32,
-    pub(crate) floor_texture: Texture2D,
+    // Floor variables now! No longer :(  now :)
+    pub(crate) x: f32,
+    pub(crate) texture: Texture2D,
 }
 
 impl Floor {
     pub(crate) async fn draw_floor(&mut self) {
-        let floor_width = screen_width();
-        let floor_height = 24.0;
+        let width = screen_width();
+        let height = 24.0;
 
-        for offset in [0.0, floor_width].iter() {
+        for offset in [0.0, width].iter() {
             draw_texture_ex(
-                &self.floor_texture,
-                self.floor_x + *offset,
+                &self.texture,
+                self.x + *offset,
                 screen_height() - 45.0,
                 WHITE,
                 DrawTextureParams {
-                    dest_size: Some(vec2(floor_width, floor_height)),
+                    dest_size: Some(vec2(width, height)),
                     source: None,
                     ..Default::default()
                 },

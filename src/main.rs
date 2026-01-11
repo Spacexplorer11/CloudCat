@@ -70,10 +70,10 @@ async fn main() {
     cat_texture.set_filter(FilterMode::Nearest);
 
     let mut cat = Cat {
-        cat_frame: 0,
-        cat_timer: 0.0,
-        cat_run_speed: 0.05,
-        cat_texture: &cat_texture,
+        frame: 0,
+        timer: 0.0,
+        run_speed: 0.05,
+        texture: &cat_texture,
     };
 
     let cloud_texture: Texture2D = load_texture(get_asset_path("cloud.png").as_str())
@@ -82,10 +82,10 @@ async fn main() {
     cloud_texture.set_filter(FilterMode::Nearest);
 
     let mut clouds: Vec<Cloud> = vec![Cloud {
-        cloud_x: screen_width(),
-        cloud_frame: 0,
-        cloud_timer: 0.0,
-        cloud_texture: &cloud_texture,
+        x: screen_width(),
+        frame: 0,
+        timer: 0.0,
+        texture: &cloud_texture,
     }];
 
     // Which clouds must be incinerated :(
@@ -97,8 +97,8 @@ async fn main() {
     floor_texture.set_filter(FilterMode::Nearest);
 
     let mut floor = Floor {
-        floor_x: 0.0,
-        floor_texture,
+        x: 0.0,
+        texture: floor_texture,
     };
 
     let umbrella_texture: Texture2D = load_texture(get_asset_path("umbrella.png").as_str())
@@ -107,8 +107,8 @@ async fn main() {
     umbrella_texture.set_filter(FilterMode::Nearest);
 
     let mut umbrella = Umbrella {
-        umbrella_start_time: 0.0,
-        umbrella_texture,
+        start_time: 0.0,
+        texture: umbrella_texture,
     };
 
     let settings: Texture2D = load_texture(get_asset_path("settings.png").as_str())
@@ -143,10 +143,10 @@ async fn main() {
 
     // Special extra TITLE cat object (our catty ain't an object but... yeah that's what we call the collection of variables I think... or is it Struct or idk man)
     let mut title_cat = Cat {
-        cat_frame: 0,
-        cat_timer: 0.0,
-        cat_run_speed: 0.05,
-        cat_texture: &cat_texture,
+        frame: 0,
+        timer: 0.0,
+        run_speed: 0.05,
+        texture: &cat_texture,
     };
     let mut title_cat_x = 0.0;
 
@@ -173,7 +173,7 @@ async fn main() {
                         get_responsive_size(32.0) * 5.0,
                     )),
                     source: Some(Rect {
-                        x: 32.0 * title_cat.cat_frame as f32,
+                        x: 32.0 * title_cat.frame as f32,
                         y: 0.0,
                         w: 32.0,
                         h: 32.0,
@@ -181,10 +181,10 @@ async fn main() {
                     ..Default::default()
                 },
             );
-            title_cat.cat_timer += get_frame_time();
-            if title_cat.cat_timer > title_cat.cat_run_speed {
-                title_cat.cat_timer = 0.0;
-                title_cat.cat_frame = (title_cat.cat_frame + 1) % 3;
+            title_cat.timer += get_frame_time();
+            if title_cat.timer > title_cat.run_speed {
+                title_cat.timer = 0.0;
+                title_cat.frame = (title_cat.frame + 1) % 3;
             }
             draw_centred_text(
                 "CloudCat",
@@ -310,22 +310,22 @@ async fn main() {
                 .await;
             if settings_menu_not_active {
                 // Catty
-                cat.cat_frame = 0;
-                cat.cat_timer = 0.0;
-                cat.cat_run_speed = 0.05;
+                cat.frame = 0;
+                cat.timer = 0.0;
+                cat.run_speed = 0.05;
 
                 // Cloudy
                 for cloud in &mut clouds {
-                    cloud.cloud_x = screen_width();
-                    cloud.cloud_frame = 0;
-                    cloud.cloud_timer = 0.0;
+                    cloud.x = screen_width();
+                    cloud.frame = 0;
+                    cloud.timer = 0.0;
                 }
 
                 // Floorrrrrrr
-                floor.floor_x = 0.0;
+                floor.x = 0.0;
 
                 // Umbrellaaaaaaaa
-                umbrella.umbrella_start_time = 0.0;
+                umbrella.start_time = 0.0;
 
                 // Let's go back to the start!
                 game_over = false;
@@ -399,24 +399,22 @@ async fn main() {
         }
 
         if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-            if umbrella.umbrella_start_time == 0.0
-                || get_time() - umbrella.umbrella_start_time > 3.0
-            {
-                umbrella.umbrella_start_time = get_time();
+            if umbrella.start_time == 0.0 || get_time() - umbrella.start_time > 3.0 {
+                umbrella.start_time = get_time();
             }
         }
 
-        if cat.cat_run_speed > 0.01 {
-            cat.cat_run_speed -= 0.0006 * dt;
+        if cat.run_speed > 0.01 {
+            cat.run_speed -= 0.0006 * dt;
         }
 
-        let scroll_speed = 7.5 / cat.cat_run_speed;
+        let scroll_speed = 7.5 / cat.run_speed;
 
-        let mut positions: Vec<f32> = clouds.iter().map(|cloud| cloud.cloud_x).collect();
+        let mut positions: Vec<f32> = clouds.iter().map(|cloud| cloud.x).collect();
         for (i, cloud) in &mut clouds.iter_mut().enumerate() {
-            cloud.cloud_x -= scroll_speed * dt;
+            cloud.x -= scroll_speed * dt;
 
-            if cloud.cloud_x < -192.0 {
+            if cloud.x < -192.0 {
                 if i == 0 {
                     #[cfg(not(target_arch = "wasm32"))]
                     let mut new_x = screen_width() + rng.random_range(150.0..=200.0);
@@ -431,9 +429,9 @@ async fn main() {
                         }
                     }
 
-                    cloud.cloud_x = new_x;
-                    cloud.cloud_frame = 0;
-                    cloud.cloud_timer = 0.0;
+                    cloud.x = new_x;
+                    cloud.frame = 0;
+                    cloud.timer = 0.0;
 
                     positions.push(new_x);
                 } else {
@@ -448,22 +446,21 @@ async fn main() {
         clouds_to_die.clear();
 
         for cloud in &mut clouds {
-            (cloud.cloud_timer, cloud.cloud_frame) = cloud.draw_cloud().await;
+            (cloud.timer, cloud.frame) = cloud.draw_cloud().await;
         }
 
-        let umbrella_up = umbrella.umbrella_start_time != 0.0
-            && (get_time() - umbrella.umbrella_start_time) < 3.0;
+        let umbrella_up = umbrella.start_time != 0.0 && (get_time() - umbrella.start_time) < 3.0;
         if umbrella_up {
             umbrella.draw_umbrella().await;
         }
 
-        (cat.cat_timer, cat.cat_frame) = cat.draw_cat().await;
+        (cat.timer, cat.frame) = cat.draw_cat().await;
 
         floor.draw_floor().await;
 
-        floor.floor_x -= scroll_speed * dt;
-        if floor.floor_x <= -screen_width() {
-            floor.floor_x = 0.0;
+        floor.x -= scroll_speed * dt;
+        if floor.x <= -screen_width() {
+            floor.x = 0.0;
         }
 
         for cloud in &clouds {
@@ -472,10 +469,10 @@ async fn main() {
             let cat_width = get_responsive_size(32.0) * 5.0;
             let cloud_width = get_responsive_size(32.0) * 6.0;
 
-            let cloud_right = cloud.cloud_x + cloud_width;
+            let cloud_right = cloud.x + cloud_width;
             let cat_right = cat_x + cat_width;
 
-            if cloud.cloud_x < cat_right && cloud_right > cat_x && !umbrella_up {
+            if cloud.x < cat_right && cloud_right > cat_x && !umbrella_up {
                 if score_u32 > highscore {
                     highscore::HighscoreManager::save(score_u32);
                     highscore = score_u32;
@@ -486,10 +483,10 @@ async fn main() {
 
         score += 60.0 * dt;
         #[cfg(not(target_arch = "wasm32"))]
-        let rand_int = rng.random_range(1..=(50 * ((cat.cat_run_speed * 1000.0) as i32)));
+        let rand_int = rng.random_range(1..=(50 * ((cat.run_speed * 1000.0) as i32)));
 
         #[cfg(target_arch = "wasm32")]
-        let rand_int = rand::gen_range(1, 50 * ((cat.cat_run_speed * 1000.0) as i32));
+        let rand_int = rand::gen_range(1, 50 * ((cat.run_speed * 1000.0) as i32));
 
         if rand_int == 11 {
             #[cfg(not(target_arch = "wasm32"))]
@@ -500,17 +497,17 @@ async fn main() {
 
             let mut too_close_cloud = false;
             for cloud in &clouds {
-                if (cloud.cloud_x - new_cloud_x).abs() <= get_responsive_size(32.0) * 20.0 {
+                if (cloud.x - new_cloud_x).abs() <= get_responsive_size(32.0) * 20.0 {
                     too_close_cloud = true;
                     break;
                 }
             }
             if !too_close_cloud {
                 clouds.push(Cloud {
-                    cloud_x: new_cloud_x,
-                    cloud_frame: 0,
-                    cloud_timer: 0.0,
-                    cloud_texture: &cloud_texture,
+                    x: new_cloud_x,
+                    frame: 0,
+                    timer: 0.0,
+                    texture: &cloud_texture,
                 });
             }
         }
