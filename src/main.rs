@@ -17,7 +17,6 @@ use crate::entities::umbrella::Umbrella;
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
 use std::env;
-use std::path::Path;
 
 pub(crate) fn get_responsive_size(base_size: f32) -> f32 {
     let min_dimension = screen_width().min(screen_height());
@@ -39,17 +38,24 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
 }
 
 fn get_asset_path(asset: &str) -> String {
-    if cfg!(not(debug_assertions)) {
-        let exe_path = env::current_exe()
-            .unwrap_or_else(|e| panic!("Failed to get current executable path: {e}"));
-
-        let mut exe_path = Path::parent(&*exe_path).unwrap().to_path_buf();
-
-        exe_path.push("assets");
-        exe_path.push(asset);
-        exe_path.to_str().unwrap().parse().unwrap()
+    if cfg!(debug_assertions) {
+        format!("assets/{}", asset)
     } else {
-        format!("/assets/{asset}")
+        let exe_path = env::current_exe()
+            .unwrap_or_else(|e| panic!("Failed to get current executable path: {}", e));
+
+        let exe_dir = exe_path
+            .parent()
+            .unwrap_or_else(|| panic!("Failed to get executable directory"));
+
+        let mut asset_path = exe_dir.to_path_buf();
+        asset_path.push("assets");
+        asset_path.push(asset);
+
+        asset_path
+            .to_str()
+            .unwrap_or_else(|| panic!("Failed to convert path to string"))
+            .to_string()
     }
 }
 
