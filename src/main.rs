@@ -1,18 +1,13 @@
+mod entities;
 mod highscore;
 mod settings;
-
-mod entities {
-    pub mod cat;
-    pub mod cloud;
-    pub mod floor;
-    pub mod umbrella;
-}
 
 use crate::entities::cat::Cat;
 use crate::entities::cloud::Cloud;
 use crate::entities::floor::Floor;
 use crate::entities::umbrella::Umbrella;
 
+use crate::entities::Animation;
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
@@ -446,17 +441,17 @@ async fn main() {
         clouds_to_die.clear();
 
         for cloud in &mut clouds {
-            (cloud.timer, cloud.frame) = cloud.draw_cloud().await;
+            (cloud.timer, cloud.frame) = cloud.draw().await;
         }
 
         let umbrella_up = umbrella.start_time != 0.0 && (get_time() - umbrella.start_time) < 3.0;
         if umbrella_up {
-            umbrella.draw_umbrella().await;
+            umbrella.draw().await;
         }
 
-        (cat.timer, cat.frame) = cat.draw_cat().await;
+        (cat.timer, cat.frame) = cat.draw().await;
 
-        floor.draw_floor().await;
+        floor.draw().await;
 
         floor.x -= scroll_speed * dt;
         if floor.x <= -screen_width() {

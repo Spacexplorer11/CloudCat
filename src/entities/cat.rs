@@ -1,3 +1,4 @@
+use crate::entities::Animation;
 use crate::get_responsive_size;
 use macroquad::color::WHITE;
 use macroquad::math::{Rect, vec2};
@@ -13,8 +14,8 @@ pub(crate) struct Cat<'a> {
     pub(crate) texture: &'a Texture2D,
 }
 
-impl Cat<'_> {
-    pub(crate) async fn draw_cat(&mut self) -> (f32, i32) {
+impl Animation for Cat<'_> {
+    async fn draw(&mut self) -> (f32, i32) {
         let frame_width = 32.0;
         let frame_height = 32.0;
         draw_texture_ex(

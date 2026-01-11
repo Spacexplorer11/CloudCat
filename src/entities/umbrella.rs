@@ -10,7 +10,7 @@ pub(crate) struct Umbrella {
 }
 
 impl Umbrella {
-    pub(crate) async fn draw_umbrella(&self) {
+    pub(crate) async fn draw(&self) {
         let width = 32.0;
         let height = 32.0;
 

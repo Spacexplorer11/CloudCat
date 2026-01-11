@@ -11,7 +11,7 @@ pub(crate) struct Floor {
 }
 
 impl Floor {
-    pub(crate) async fn draw_floor(&mut self) {
+    pub(crate) async fn draw(&mut self) {
         let width = screen_width();
         let height = 24.0;
 
