@@ -47,7 +47,7 @@ fn get_asset_path(asset: &str) -> String {
 
         exe_path.push("assets");
         exe_path.push(asset);
-        exe_path.to_str().unwrap().parse().unwrap()
+        exe_path.to_string_lossy().to_string()
     } else {
         format!("/assets/{asset}")
     }
