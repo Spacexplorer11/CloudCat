@@ -33,7 +33,7 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
 }
 
 fn get_asset_path(asset: &str) -> String {
-    if cfg!(debug_assertions) {
+    if cfg!(debug_assertions) || cfg!(target_arch="wasm32") {
         format!("assets/{}", asset)
     } else {
         let exe_path = env::current_exe()
