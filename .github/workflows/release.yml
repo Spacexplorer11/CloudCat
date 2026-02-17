@@ -2,6 +2,7 @@ name: Release CloudCat
 
 permissions:
   contents: write
+  models: read
 
 on:
   push:
@@ -195,17 +196,27 @@ jobs:
     if: needs.build-linux-windows.outputs.should-release == 'true'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed to retrieve tags and git history for changelog
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           merge-multiple: true
 
-      - name: Generate release notes with Gemini
+      - name: Install gh-models extension
+        run: gh extension install https://github.com/github/gh-models
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate release notes with GitHub Models
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Fetching commits..."
-
-          LATEST_TAG="${{ env.LATEST_TAG }}"
+          
+          # Evaluate LATEST_TAG locally since environment variables do not carry over between jobs
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || true)
 
           if [ -n "$LATEST_TAG" ]; then
             COMMITS=$(git log "$LATEST_TAG"..HEAD --pretty=format:"- %s")
@@ -213,25 +224,9 @@ jobs:
             COMMITS=$(git log --pretty=format:"- %s")
           fi
 
-          PROMPT=$(printf "Summarise the following commit messages into a clear, user-friendly changelog in markdown.\n- Group related changes together under headings if possible (e.g. Features, Fixes, Improvements).\n- Write in concise past tense or imperative style (e.g. \"Fixed crash when...\", \"Add support for...\").\n- Do not include any extra text outside the changelog itself.\n\nCommit messages:\n%s" "$COMMITS")
-          echo "PROMPT:"
-          echo "$PROMPT"
-
-          JSON=$(jq -n \
-            --arg prompt "$PROMPT" \
-            '{
-              contents: [{
-                role: "user",
-                parts: [{ text: $prompt }]
-              }]
-            }')
-
-          curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent" \
-            -H "Content-Type: application/json" \
-            -H "X-goog-api-key: ${{ secrets.GEMINI_API_KEY }}" \
-            -d "$JSON" \
-            | tee full-response.json \
-            | jq -r '.candidates[0].content.parts[0].text' > release-notes.md
+          # Pipe commits directly into the gh model prompt
+          echo "$COMMITS" | gh models run google/openai/gpt-5-nano \
+            "Summarise the following commit messages into a clear, user-friendly changelog in markdown. Group related changes together under headings if possible (e.g. Features, Fixes, Improvements). Write in concise past tense or imperative style (e.g. 'Fixed crash when...', 'Add support for...'). Do not include any extra text outside the changelog itself." > release-notes.md
 
       - name: Push new tag
         run: |
