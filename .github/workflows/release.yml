@@ -225,7 +225,7 @@ jobs:
           fi
 
           # Pipe commits directly into the gh model prompt
-          echo "$COMMITS" | gh models run google/openai/gpt-5-nano \
+          echo "$COMMITS" | gh models run openai/gpt-5-nano \
             "Summarise the following commit messages into a clear, user-friendly changelog in markdown. Group related changes together under headings if possible (e.g. Features, Fixes, Improvements). Write in concise past tense or imperative style (e.g. 'Fixed crash when...', 'Add support for...'). Do not include any extra text outside the changelog itself." > release-notes.md
 
       - name: Push new tag
