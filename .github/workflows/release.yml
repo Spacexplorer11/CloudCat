@@ -17,10 +17,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: 1.85.0
-          override: true
 
       - name: Check Cargo version bump (macOS)
         id: version
