@@ -239,7 +239,7 @@ async fn main() {
                 && my >= skip_button_y
                 && my <= skip_button_y + skip_button_size
             {
-                if is_mouse_button_down(MouseButton::Left) {
+                if is_mouse_button_pressed(MouseButton::Left) {
                     title_screen_frame = 500;
                 }
             }
