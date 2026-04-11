@@ -211,10 +211,14 @@ async fn main() {
                 false,
             );
 
+            let skip_button_size = get_responsive_size(32.0);
+            let skip_button_x = screen_width() - (get_responsive_size(32.0) * 1.5);
+            let skip_button_y = screen_height() - (get_responsive_size(32.0) * 1.5);
+
             draw_texture_ex(
                 &skip_button,
-                screen_width() - get_responsive_size(32.0) * 1.5,
-                screen_height() - get_responsive_size(32.0) * 1.5,
+                skip_button_x,
+                skip_button_y,
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(get_responsive_size(32.0), get_responsive_size(32.0))),
@@ -228,16 +232,12 @@ async fn main() {
                 },
             );
 
-            let button_size = get_responsive_size(32.0);
-            let button_x = screen_width() - (get_responsive_size(32.0) * 1.5);
-            let button_y = screen_height() - (get_responsive_size(32.0) * 1.5);
-
             let (mx, my) = mouse_position();
 
-            if mx >= button_x
-                && mx <= button_x + button_size
-                && my >= button_y
-                && my <= button_y + button_size
+            if mx >= skip_button_x
+                && mx <= skip_button_x + skip_button_size
+                && my >= skip_button_y
+                && my <= skip_button_y + skip_button_size
             {
                 if is_mouse_button_down(MouseButton::Left) {
                     title_screen_frame = 500;
