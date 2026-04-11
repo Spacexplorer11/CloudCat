@@ -33,7 +33,7 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
 }
 
 fn get_asset_path(asset: &str) -> String {
-    if cfg!(debug_assertions) || cfg!(target_arch="wasm32") {
+    if cfg!(debug_assertions) || cfg!(target_arch = "wasm32") {
         format!("assets/{}", asset)
     } else {
         let exe_path = env::current_exe()
@@ -126,6 +126,11 @@ async fn main() {
         .unwrap();
     github_icon.set_filter(FilterMode::Linear);
 
+    let skip_button: Texture2D = load_texture(get_asset_path("skip_button.png").as_str())
+        .await
+        .unwrap();
+    skip_button.set_filter(FilterMode::Linear);
+
     // Game OVER RAWHHH >:)
     let mut game_over = false;
 
@@ -205,6 +210,39 @@ async fn main() {
                 },
                 false,
             );
+
+            let skip_button_size = get_responsive_size(32.0);
+            let skip_button_x = screen_width() - (get_responsive_size(32.0) * 1.5);
+            let skip_button_y = screen_height() - (get_responsive_size(32.0) * 1.5);
+
+            draw_texture_ex(
+                &skip_button,
+                skip_button_x,
+                skip_button_y,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(get_responsive_size(32.0), get_responsive_size(32.0))),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
+            );
+
+            let (mx, my) = mouse_position();
+
+            if mx >= skip_button_x
+                && mx <= skip_button_x + skip_button_size
+                && my >= skip_button_y
+                && my <= skip_button_y + skip_button_size
+            {
+                if is_mouse_button_pressed(MouseButton::Left) {
+                    title_screen_frame = 500;
+                }
+            }
 
             title_screen_frame += 1;
             title_screen_opacity = (title_screen_opacity - 0.0016).max(0.0);
