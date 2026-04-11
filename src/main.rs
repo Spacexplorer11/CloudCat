@@ -33,7 +33,7 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
 }
 
 fn get_asset_path(asset: &str) -> String {
-    if cfg!(debug_assertions) || cfg!(target_arch="wasm32") {
+    if cfg!(debug_assertions) || cfg!(target_arch = "wasm32") {
         format!("assets/{}", asset)
     } else {
         let exe_path = env::current_exe()
@@ -126,6 +126,11 @@ async fn main() {
         .unwrap();
     github_icon.set_filter(FilterMode::Linear);
 
+    let skip_button: Texture2D = load_texture(get_asset_path("skip_button.png").as_str())
+        .await
+        .unwrap();
+    skip_button.set_filter(FilterMode::Linear);
+
     // Game OVER RAWHHH >:)
     let mut game_over = false;
 
@@ -204,6 +209,23 @@ async fn main() {
                     a: title_screen_opacity,
                 },
                 false,
+            );
+
+            draw_texture_ex(
+                &skip_button,
+                screen_width() - get_responsive_size(32.0) * 1.5,
+                screen_height() - get_responsive_size(32.0) * 1.5,
+                WHITE,
+                DrawTextureParams {
+                    dest_size: Some(vec2(get_responsive_size(32.0), get_responsive_size(32.0))),
+                    source: Some(Rect {
+                        x: 0.0,
+                        y: 0.0,
+                        w: 32.0,
+                        h: 32.0,
+                    }),
+                    ..Default::default()
+                },
             );
 
             title_screen_frame += 1;
