@@ -157,7 +157,7 @@ jobs:
       - name: Build Windows x86_64
         if: env.SHOULD_RELEASE == 'true'
         run: |
-          sudo apt-get update && sudo apt-get install -y mingw-w64
+          sudo apt-get update && sudo apt-get install -y mingw-w64 musl-tools
           cargo build --release --target x86_64-pc-windows-gnu
           cp -r assets target/x86_64-pc-windows-gnu/release/
 
