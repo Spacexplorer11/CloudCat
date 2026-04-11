@@ -228,6 +228,22 @@ async fn main() {
                 },
             );
 
+            let button_size = get_responsive_size(32.0);
+            let button_x = screen_width() - (get_responsive_size(32.0) * 1.5);
+            let button_y = screen_height() - (get_responsive_size(32.0) * 1.5);
+
+            let (mx, my) = mouse_position();
+
+            if mx >= button_x
+                && mx <= button_x + button_size
+                && my >= button_y
+                && my <= button_y + button_size
+            {
+                if is_mouse_button_down(MouseButton::Left) {
+                    title_screen_frame = 500;
+                }
+            }
+
             title_screen_frame += 1;
             title_screen_opacity = (title_screen_opacity - 0.0016).max(0.0);
             title_cat_x += screen_width() / 500.0;
