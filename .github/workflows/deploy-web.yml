@@ -33,16 +33,41 @@ jobs:
       uses: Swatinem/rust-cache@v2
       with:
         cache-targets: true
+
+    - name: Cache npm
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
     - name: Build WASM
       run: cargo build --target wasm32-unknown-unknown --release
       
+    - name: Minify JS
+      run: |
+        npx terser gl.js -o gl.min.js
+        npx terser quad-storage.js -o quad-storage.min.js
+        npx terser sapp_jsutils.js -o sapp_jsutils.min.js
+
     - name: Setup web directory
       run: |
         mkdir -p web
         cp target/wasm32-unknown-unknown/release/cloudcat.wasm web/
-        cp index.html gl.js quad-storage.js sapp_jsutils.js web/
+        cp index.html web/
+        cp gl.min.js web/gl.js
+        cp quad-storage.min.js web/quad-storage.js
+        cp sapp_jsutils.min.js web/sapp_jsutils.js
         cp -r assets web/
         cp -r favicons web/
+        
+        # Cache busting: append commit hash as version query parameter to assets in index.html
+        VERSION=${{ github.sha }}
+        sed -i "s/gl.js/gl.js?v=$VERSION/g" web/index.html
+        sed -i "s/sapp_jsutils.js/sapp_jsutils.js?v=$VERSION/g" web/index.html
+        sed -i "s/quad-storage.js/quad-storage.js?v=$VERSION/g" web/index.html
+        sed -i "s/cloudcat.wasm/cloudcat.wasm?v=$VERSION/g" web/index.html
         
     - name: Setup Pages
       uses: actions/configure-pages@v5
