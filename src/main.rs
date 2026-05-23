@@ -238,10 +238,9 @@ async fn main() {
                 && mx <= skip_button_x + skip_button_size
                 && my >= skip_button_y
                 && my <= skip_button_y + skip_button_size
+                && is_mouse_button_pressed(MouseButton::Left)
             {
-                if is_mouse_button_pressed(MouseButton::Left) {
-                    title_screen_frame = 500;
-                }
+                title_screen_frame = 500;
             }
 
             title_screen_frame += 1;
@@ -431,10 +430,10 @@ async fn main() {
             );
         }
 
-        if is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left) {
-            if umbrella.start_time == 0.0 || get_time() - umbrella.start_time > 3.0 {
-                umbrella.start_time = get_time();
-            }
+        if (is_key_pressed(KeyCode::Space) || is_mouse_button_pressed(MouseButton::Left))
+            && (umbrella.start_time == 0.0 || get_time() - umbrella.start_time > 3.0)
+        {
+            umbrella.start_time = get_time();
         }
 
         if cat.run_speed > 0.01 {

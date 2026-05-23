@@ -15,6 +15,6 @@ impl HighscoreManager {
 
     pub(crate) fn save(score: u32) {
         let mut storage = STORAGE.lock().unwrap();
-        storage.set("cloudcat_highscore", &*score.to_string());
+        storage.set("cloudcat_highscore", &score.to_string());
     }
 }

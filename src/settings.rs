@@ -9,6 +9,7 @@ use macroquad::prelude::{
     screen_width,
 };
 use macroquad::text::draw_text;
+
 #[cfg(not(target_arch = "wasm32"))]
 use webbrowser;
 
