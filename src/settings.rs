@@ -10,9 +10,6 @@ use macroquad::prelude::{
 };
 use macroquad::text::draw_text;
 
-#[cfg(not(target_arch = "wasm32"))]
-use webbrowser;
-
 pub(crate) struct Settings;
 
 impl Settings {
