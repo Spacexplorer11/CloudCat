@@ -1,65 +1,75 @@
 # Cloud Cat
-![Hackatime badge](https://hackatime-badge.hackclub.com/U08D22QNUVD/CloudCat)
+[![Hackatime](https://hackatime-badge.hackclub.com/U08D22QNUVD/CloudCat)](https://waka.hackclub.com)
+[![Latest Release](https://img.shields.io/github/v/release/spacexplorer11/CloudCat?style=flat)](https://github.com/Spacexplorer11/CloudCat/releases/latest)
+[![License](https://img.shields.io/github/license/spacexplorer11/CloudCat?style=flat)](LICENSE)
 
 ## What is CloudCat?
 
-CloudCat is a remix of the iconic chrome dinosaur game, which chrome shows when you are offline.  
-However CloudCat instead is a game where you play as a cat strolling along.  
-Some devious **rainclouds** are trying to rain on your parade, and you must use your umbrella to protect yourself to
-keep your fur dry!
+CloudCat is a remix of the iconic Chrome dinosaur game, you know, the one you see when you're offline.
+
+You play as a cat strolling along while devious **rainclouds** try to rain on your parade. Hold up your umbrella to keep your fur dry!
 
 ## Why did I make it?
 
-I made this game to have some fun, and to learn Rust! It is my first ever rust project (that I started), so don't expect it to be
-perfect.  
-It's made using Macroquad, a game library for Rust, and is heavily inspired by the original chrome dinosaur game.
+I made this game to have some fun, and to learn Rust! It is my first ever Rust project, so don't expect it to be perfect. It's made using Macroquad, a game library for Rust, and is heavily inspired by the original Chrome dinosaur game.
 
-## How do I play?
+## How to play
 
-You can download the [latest release](https://github.com/Spacexplorer11/CloudCat/releases/latest) for your OS or [play it in your browser](https://cloudcat.online)!
-Press `Space` or click/tap the screen to activate the umbrella, and that's all you need to do!  
-Your highscore is automatically saved/loaded.  
->[!CAUTION]
-> Your highscore is only saved when your game is over and you can see the game over screen
-> **NOT** when quitting at any point.
+[**Play in your browser →**](https://cloudcat.online) or grab the [latest release](https://github.com/Spacexplorer11/CloudCat/releases/latest) for your OS.
 
->[!Tip]
-> Please provide feedback through this [simple survey](https://tally.so/r/2EXNLe) or by making an [issue](https://github.com/Spacexplorer11/CloudCat/issues/new?template=feature_request.yml)!
-> Your feedback will help shape the game and improve it!
+- **Space**, **click**, or **tap** to raise the umbrella
+- The umbrella lasts **3 seconds** per use
+- Survive as long as possible without getting rained on
+- Your highscore is saved automatically - **but only once the game over screen appears, not if you quit mid-game**
+
+> [!TIP]
+> Got feedback or ideas? Fill in the [quick survey](https://tally.so/r/2EXNLe) or [open an issue](https://github.com/Spacexplorer11/CloudCat/issues/new?template=feature_request.yml)!
 
 ## Memory usage
-Tested on a MacBook Air M1 2020 during the main play section of the game. I used the v1.3.1 macos-arm-64 build.  
-I got a result of 61.8 MB.  
-<img width="1036" height="121" alt="SCR-20260111-jwmp" src="https://github.com/user-attachments/assets/77422f05-c771-457a-831a-6ed1dc9ac098" />
 
-## How to run locally (dev version)
-**You must be in the correct directory (root of the project) to run these commands**
-### Rust Version
-Run `cargo run`
+Tested on a MacBook Air M1 (2020), v1.3.1 macOS ARM64 build, during active gameplay: **61.8 MB**.
 
-### WASM Version (Web)
-_You must delete the web (if it exists) directory before running this_  
-**You will also need python for the http server, if you can't get it, you can create one yourself using a different method**  
-**This will only work on Unix-based systems like macOS & Linux, it may not work on Windows**  
-Run 
+<img width="1036" height="121" alt="Memory usage screenshot" src="https://github.com/user-attachments/assets/77422f05-c771-457a-831a-6ed1dc9ac098" />
+
+## Running locally
+
+**Make sure you're in the project root before running any of these commands.**
+
+### Native (Rust)
+
 ```bash
+cargo run
+```
+
+### Web (WASM)
+
+> [!NOTE]
+> Requires Python 3 for the local HTTP server. Only tested on macOS and Linux - may not work on Windows.
+
+```bash
+rm -rf web
 cargo build --target wasm32-unknown-unknown --release
-mkdir -p web
+mkdir web
 cp target/wasm32-unknown-unknown/release/cloudcat.wasm web/
 cp index.html gl.js quad-storage.js sapp_jsutils.js web/
-cp -r assets web/
-cp -r favicons web/
-cd web
-python3 -m http.server 3000
-```  
-Then go to http://localhost:3000 in your browser
+cp -r assets favicons web/
+cd web && python3 -m http.server 3000
+```
+
+Then open **http://localhost:3000** (not https! The local server is plain HTTP).
+
+## Tech
+
+Built with [Macroquad](https://macroquad.rs/) in Rust, compiled to WebAssembly for the browser version.
 
 ## AI transparency
-- **Minimal (5-10%)** AI was used in the actual gameplay and screens.
-- **NO (0%)** AI was used in the game assets (cat, cloud, umbrella), I'm very proud of myself to have hand-drawn and hand-animated them! :) _Except the floor_
-- **Very Heavy (90%)** AI was used to allow me to deploy this game to the web since idk a thing abt that or WebGL.
-- **Full (100%)** AI is used in Release Notes since those are auto-generated by AI models. The workflow which creates the releases is also AI-generated as I don't know YAML or GH actions stuff, but I am hoping to learn, so I don't need to generate future workflows
-  
-  ---
-  
-Overall, I'm proud to say that in the actual gameplay, concept and art, very little AI was used!
+
+| Area                               | AI usage                                                 |
+|------------------------------------|----------------------------------------------------------|
+| Gameplay & screens                 | Minimal (~5–10%)                                         |
+| Game assets (cat, cloud, umbrella) | **None** - hand-drawn and hand-animated 🎨               |
+| Web/WebGL deployment               | Heavy (~90%)                                             |
+| Release notes                      | Full (100%) - auto-generated                             |
+| GitHub Actions workflows           | Full (100%) - generated, hoping to learn YAML eventually |
+
+Overall, the actual gameplay, concept, and art are almost entirely my own work which I'm very proud of!
