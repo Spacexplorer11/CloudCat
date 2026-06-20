@@ -36,12 +36,11 @@ fn get_asset_path(asset: &str) -> String {
     if cfg!(debug_assertions) || cfg!(target_arch = "wasm32") {
         format!("assets/{}", asset)
     } else {
-        let exe_path = env::current_exe()
-            .unwrap_or_else(|e| panic!("Failed to get current executable path: {}", e));
+        let exe_path = env::current_exe().expect("Failed to get current executable path");
 
         let exe_dir = exe_path
             .parent()
-            .unwrap_or_else(|| panic!("Failed to get executable directory"));
+            .expect("Failed to get executable directory");
 
         let mut asset_path = exe_dir.to_path_buf();
         asset_path.push("assets");
@@ -49,7 +48,7 @@ fn get_asset_path(asset: &str) -> String {
 
         asset_path
             .to_str()
-            .unwrap_or_else(|| panic!("Failed to convert path to string"))
+            .expect("Failed to convert path to string")
             .to_string()
     }
 }
