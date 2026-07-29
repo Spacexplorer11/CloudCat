@@ -6,18 +6,86 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width" />
 	<meta name="description" content="A fun and easy to play game based off the Chrome Dino game.">
+	<meta name="application-name" content="Cloud Cat" lang="en" />
+	<meta name="author" content="Akaalroop Singh"/>
+	<meta name="color-scheme" content="only light">
+	<meta name="keywords" content="game easy-to-play online chrome-dino dino cat cloud rain umbrella endless-runner arcade browser-game no-download webassembly rust-game free-game jumping-game single-player mobile-game offline-game casual-game"/>
+	<meta name="theme-color" content="#000000"/>
+	<link rel="canonical" href="https://cloudcat.online/"/>
+
+	<!-- Open Graph -->
+	<meta property="og:title" content="CloudCat - Online official version!"/>
+	<meta property="og:description" content="A fun and easy to play game based off the Chrome Dino game."/>
+	<meta property="og:image" content="https://cloudcat.online/assets/og-image.png"/>
+	<meta property="og:url" content="https://cloudcat.online/"/>
+	<meta property="og:type" content="website"/>
+
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image"/>
+	<meta name="twitter:title" content="CloudCat - Online official version!"/>
+	<meta name="twitter:description" content="A fun and easy to play game based off the Chrome Dino game."/>
+	<meta name="twitter:image" content="https://cloudcat.online/assets/og-image.png"/>
+
+	<!-- Structured data -->
+	<script type="application/ld+json">
+		{
+			"@context": "https://schema.org",
+			"@type": "VideoGame",
+			"name": "CloudCat",
+			"url": "https://cloudcat.online/",
+			"description": "A fun and easy to play endless-runner game based off the Chrome Dino game, built in Rust with Macroquad and compiled to WebAssembly.",
+			"genre": ["Endless Runner", "Arcade"],
+			"gamePlatform": ["Web Browser"],
+			"applicationCategory": "Game",
+			"operatingSystem": "Any",
+			"author": {
+				"@type": "Person",
+				"name": "Akaalroop Singh"
+			},
+			"offers": {
+				"@type": "Offer",
+				"price": "0",
+				"priceCurrency": "USD"
+			}
+		}
+	</script>
+
 	<style>
-		html,
-		body,
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: black;
+		}
+		#game-viewport {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			z-index: 0;
+			background: black;
+		}
 		canvas {
 			margin: 0;
 			padding: 0;
 			width: 100%;
 			height: 100%;
-			overflow: hidden;
-			position: absolute;
+			display: block;
 			background: black;
-			z-index: 0;
+		}
+		#about {
+			margin-top: 100vh;
+			background: #111;
+			color: #eee;
+			font-family: system-ui, -apple-system, sans-serif;
+			padding: 2rem 1.5rem 3rem;
+			box-sizing: border-box;
+		}
+		#about h2 {
+			margin-top: 2rem;
+		}
+		#about a {
+			color: #7fd1ff;
 		}
 	</style>
 	<link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96"/>
@@ -33,29 +101,31 @@
 </head>
 
 <body>
-<canvas id="glcanvas" tabindex='1'></canvas>
-<h1 style="color: white; font-size: xxx-large; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
-    id="loading-message">Loading...</h1>
-<div id="gh-repo-button"
-     style="position:absolute; top:10px; left:10px; z-index:10;">
-<iframe src="https://ghbtns.com/github-btn.html?user=spacexplorer11&repo=cloudcat&type=star&size=large&text=false" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
-</div>
-<div id="gh-sponsor-button"
-     style="position:absolute; top:10px; left:60px; z-index:10;">
-	<!-- GitHub Sponsors -->
-	<iframe
-			src="https://github.com/sponsors/Spacexplorer11/button"
-			title="Sponsor Spacexplorer11"
-			height="32"
-			width="114"
-			style="border:0; border-radius:6px;"
-	></iframe>
-</div>
-<div id="bmc-button"
-     style="position:absolute; top:10px; right:10px; z-index:10;">
-	<a href="https://www.buymeacoffee.com/spacexplorer11" target="_blank" style="cursor: pointer;"><img
-			src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee"
-			style="height: 60px !important;width: 217px !important;"></a>
+<div id="game-viewport">
+	<canvas id="glcanvas" tabindex='1'></canvas>
+	<h1 style="color: white; font-size: xxx-large; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+	    id="loading-message">Loading...</h1>
+	<div id="gh-repo-button"
+	     style="position:absolute; top:10px; left:10px; z-index:10;">
+		<iframe src="https://ghbtns.com/github-btn.html?user=spacexplorer11&repo=cloudcat&type=star&size=large&text=false" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>
+	</div>
+	<div id="gh-sponsor-button"
+	     style="position:absolute; top:10px; left:60px; z-index:10;">
+		<!-- GitHub Sponsors -->
+		<iframe
+				src="https://github.com/sponsors/Spacexplorer11/button"
+				title="Sponsor Spacexplorer11"
+				height="32"
+				width="114"
+				style="border:0; border-radius:6px;"
+		></iframe>
+	</div>
+	<div id="bmc-button"
+	     style="position:absolute; top:10px; right:10px; z-index:10;">
+		<a href="https://www.buymeacoffee.com/spacexplorer11" target="_blank" style="cursor: pointer;"><img
+				src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee"
+				style="height: 60px !important;width: 217px !important;"></a>
+	</div>
 </div>
 <div id="turn-phone" style="
        display: none;
@@ -96,6 +166,20 @@
 	load("cloudcat.wasm");
 	document.getElementById("loading-message").style.display = "none";
 </script>
+
+<main id="about">
+	<h1>CloudCat</h1>
+	<p>CloudCat is a free, browser-based endless runner inspired by the Chrome Dino game — jump a cat over obstacles as the pace picks up, no download or install required.</p>
+
+	<h2>How to play</h2>
+	<p>Press space (or tap on mobile, landscape orientation) to jump. Avoid the obstacles and see how far you can get before you're caught out.</p>
+
+	<h2>Built with Rust</h2>
+	<p>CloudCat is written entirely in Rust using the <a href="https://macroquad.rs/" rel="noopener">Macroquad</a> game framework, compiled to WebAssembly so it runs directly in your browser. The full source is open on <a href="https://github.com/spacexplorer11/cloudcat" rel="noopener">GitHub</a>.</p>
+
+	<h2>Support the project</h2>
+	<p>If you enjoy CloudCat, you can star it on <a href="https://github.com/spacexplorer11/cloudcat" rel="noopener">GitHub</a>, sponsor development via <a href="https://github.com/sponsors/Spacexplorer11" rel="noopener">GitHub Sponsors</a>, or <a href="https://www.buymeacoffee.com/spacexplorer11" rel="noopener">buy me a coffee</a>.</p>
+</main>
 </body>
 
 </html>

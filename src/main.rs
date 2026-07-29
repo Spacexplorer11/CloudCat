@@ -11,6 +11,7 @@ use crate::entities::Animation;
 #[cfg(not(target_arch = "wasm32"))]
 use ::rand::{Rng, rng};
 use macroquad::prelude::*;
+#[cfg(not(target_arch = "wasm32"))]
 use std::env;
 
 pub(crate) fn get_responsive_size(base_size: f32) -> f32 {
@@ -32,25 +33,27 @@ fn draw_centred_text(text: &str, base_font_size: f32, y: f32, colour: Color, cen
     draw_text(text, x, y, font_size, colour);
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn get_asset_path(asset: &str) -> String {
-    if cfg!(debug_assertions) || cfg!(target_arch = "wasm32") {
-        format!("assets/{}", asset)
-    } else {
-        let exe_path = env::current_exe().expect("Failed to get current executable path");
+    let exe_path = env::current_exe().expect("Failed to get current executable path");
 
-        let exe_dir = exe_path
-            .parent()
-            .expect("Failed to get executable directory");
+    let exe_dir = exe_path
+        .parent()
+        .expect("Failed to get executable directory");
 
-        let mut asset_path = exe_dir.to_path_buf();
-        asset_path.push("assets");
-        asset_path.push(asset);
+    let mut asset_path = exe_dir.to_path_buf();
+    asset_path.push("assets");
+    asset_path.push(asset);
 
-        asset_path
-            .to_str()
-            .expect("Failed to convert path to string")
-            .to_string()
-    }
+    asset_path
+        .to_str()
+        .expect("Failed to convert path to string")
+        .to_string()
+}
+
+#[cfg(target_arch = "wasm32")]
+fn get_asset_path(asset: &str) -> String {
+    format!("assets/{}", asset)
 }
 
 #[macroquad::main("CloudCat")]
@@ -60,7 +63,7 @@ async fn main() {
 
     let cat_texture: Texture2D = load_texture(get_asset_path("cat.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load cat texture");
     cat_texture.set_filter(FilterMode::Nearest);
 
     let mut cat = Cat {
@@ -72,7 +75,7 @@ async fn main() {
 
     let cloud_texture: Texture2D = load_texture(get_asset_path("cloud.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load cloud texture");
     cloud_texture.set_filter(FilterMode::Nearest);
 
     let mut clouds: Vec<Cloud> = vec![Cloud {
@@ -87,7 +90,7 @@ async fn main() {
 
     let floor_texture: Texture2D = load_texture(get_asset_path("floor.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load floor texture");
     floor_texture.set_filter(FilterMode::Nearest);
 
     let mut floor = Floor {
@@ -97,7 +100,7 @@ async fn main() {
 
     let umbrella_texture: Texture2D = load_texture(get_asset_path("umbrella.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load umbrella texture");
     umbrella_texture.set_filter(FilterMode::Nearest);
 
     let mut umbrella = Umbrella {
@@ -107,27 +110,27 @@ async fn main() {
 
     let settings: Texture2D = load_texture(get_asset_path("settings.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load settings texture");
     settings.set_filter(FilterMode::Linear);
 
     let settings_menu: Texture2D = load_texture(get_asset_path("settings-menu.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load settings menu texutre");
     settings_menu.set_filter(FilterMode::Nearest);
 
     let reset_buttons: Texture2D = load_texture(get_asset_path("reset_buttons.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load reset buttons texture");
     reset_buttons.set_filter(FilterMode::Nearest);
 
-    let github_icon: Texture2D = load_texture(get_asset_path("github_icon.png").as_str())
+    let github_icon: Texture2D = load_texture(get_asset_path("github-icon.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load GitHub icon texture");
     github_icon.set_filter(FilterMode::Linear);
 
     let skip_button: Texture2D = load_texture(get_asset_path("skip_button.png").as_str())
         .await
-        .unwrap();
+        .expect("Failed to load skip button texture");
     skip_button.set_filter(FilterMode::Linear);
 
     // Game OVER RAWHHH >:)

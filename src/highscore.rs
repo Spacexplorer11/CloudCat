@@ -5,7 +5,7 @@ pub(crate) struct HighscoreManager;
 impl HighscoreManager {
     pub(crate) fn load() -> u32 {
         let storage = STORAGE.lock().unwrap();
-        let zero: String = "0".parse().unwrap();
+        let zero: String = "0".to_string();
         storage
             .get("cloudcat_highscore")
             .unwrap_or(zero)
