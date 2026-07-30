@@ -297,7 +297,7 @@ async fn main() {
             clear_background(RED);
             draw_centred_text("GAME OVER", 100.0, 0.0, DARKGRAY, true);
             draw_centred_text(
-                &format!("Your score was {}", score_u32),
+                &format!("Your score was {score_u32}"),
                 50.0,
                 screen_height() * 0.6,
                 DARKGRAY,
@@ -378,7 +378,7 @@ async fn main() {
 
         #[cfg(not(target_arch = "wasm32"))]
         draw_text(
-            &format!("Score: {}", score_u32),
+            format!("Score: {score_u32}"),
             screen_width() * 0.7,
             50.0,
             get_responsive_size(50.0),
@@ -387,7 +387,7 @@ async fn main() {
 
         #[cfg(target_arch = "wasm32")]
         draw_text(
-            &format!("Score: {}", score_u32),
+            format!("Score: {score_u32}"),
             screen_width() * 0.7,
             110.0,
             get_responsive_size(50.0),
@@ -397,7 +397,7 @@ async fn main() {
         #[cfg(not(target_arch = "wasm32"))]
         if score_u32 < highscore {
             draw_text(
-                &format!("Your highscore is {}", highscore),
+                format!("Your highscore is {highscore}"),
                 screen_width() * 0.01,
                 50.0,
                 get_responsive_size(50.0),
@@ -405,7 +405,7 @@ async fn main() {
             );
         } else {
             draw_text(
-                &format!("Your previous highscore was {}", highscore),
+                format!("Your previous highscore was {highscore}"),
                 20.0,
                 50.0,
                 get_responsive_size(40.0),
@@ -416,7 +416,7 @@ async fn main() {
         #[cfg(target_arch = "wasm32")]
         if score_u32 < highscore {
             draw_text(
-                &format!("Your highscore is {}", highscore),
+                format!("Your highscore is {highscore}"),
                 screen_width() * 0.01,
                 110.0,
                 get_responsive_size(50.0),
@@ -424,7 +424,7 @@ async fn main() {
             );
         } else {
             draw_text(
-                &format!("Your previous highscore was {}", highscore),
+                format!("Your previous highscore was {highscore}"),
                 20.0,
                 110.0,
                 get_responsive_size(40.0),
