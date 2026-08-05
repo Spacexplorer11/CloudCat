@@ -14,6 +14,7 @@ mkdir -p web
 cp target/wasm32-unknown-unknown/release/cloudcat.wasm web/
 cp index.html web/
 cp -r assets favicons web/
+cp sitemap.xml web/
 
 # Minify JS
 npx terser gl.js          -o web/gl.js
